@@ -2,9 +2,12 @@
 
 namespace App\Providers;
 
+use App\Repositories\Contracts\User\UserRepositoryInterface;
+use App\Repositories\Eloquent\User\UserRepository;
 use Illuminate\Auth\Notifications\ResetPassword;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\ServiceProvider;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -12,7 +15,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(
+            UserRepositoryInterface::class,
+            UserRepository::class
+        );
     }
 
     /**

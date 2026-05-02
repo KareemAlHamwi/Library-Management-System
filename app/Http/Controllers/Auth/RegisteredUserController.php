@@ -6,9 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Mail\WelcomeMail;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\JsonResponse;
+// use Illuminate\Http\Response;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-//use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -22,11 +22,11 @@ class RegisteredUserController extends Controller
      *
      * @throws ValidationException
      */
-    public function store(Request $request): Response
+    public function store(Request $request): JsonResponse
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'phone' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string', 'max:255'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
@@ -44,7 +44,12 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
         Mail::to($user->email)->send(new WelcomeMail($user));
-        return response()->noContent();
+        // return response()->noContent();
         // return response()->json(['mas'], 201);
+
+        return response()->json([
+            'user' => $user,
+            'meta' => ['message' => 'Registration successful'],
+        ], 201);
     }
 }
