@@ -26,11 +26,11 @@ class AuthController extends Controller
         $user = Auth::user();
 
 
-        if (!$user->hasVerifiedEmail()) {
-            return response()->json([
-                'message' => 'Email not verified'
-            ], 403);
-        }
+        // if (!$user->hasVerifiedEmail()) {
+        //     return response()->json([
+        //         'message' => 'Email not verified'
+        //     ], 403);
+        // }
         //
         // if ($user->tokens()->count() > 0) {
         //     return response()->json([

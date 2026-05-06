@@ -23,7 +23,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable implements CanResetPassword, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory,Notifiable,PasswordsCanResetPassword;
+    use HasApiTokens, HasFactory, Notifiable, PasswordsCanResetPassword;
 
     /**
      * Get the attributes that should be cast.
@@ -38,7 +38,10 @@ class User extends Authenticatable implements CanResetPassword, MustVerifyEmail
             'role' => UserRole::class,
         ];
     }
-
+    public function profile()
+    {
+        return $this->hasOne(Profile::class);
+    }
     public function borrows(): HasMany
     {
         return $this->hasMany(Borrow::class);

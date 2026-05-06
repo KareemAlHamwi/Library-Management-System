@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Http\Requests\StoreProfileRequest;
+use App\Models\Profile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,9 +13,32 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
-    /**
-     * Display the user's profile form.
-     */
+
+    public function store(StoreProfileRequest $request)
+    {
+        $userId = Auth::user()->id;
+        $validated = $request->validated();
+        $validated['user_id'] = $userId;
+        // if ($request->hasFile('image')) {
+
+        //     $path = $request->file('image')->store('my photo', 'public');
+        //     $validated['image'] = $path;
+        // }
+        $profile = Profile::create($validated);
+        return response()->json([
+            'message:' => 'profile created successfully.',
+            'profile:' => $profile,
+        ], 201);
+    }
+
+
+
+
+
+
+
+    ///////////////////////////////////////////////////////
+
     public function edit(Request $request): View
     {
         return view('profile.edit', [
@@ -40,6 +65,14 @@ class ProfileController extends Controller
     /**
      * Delete the user's account.
      */
+
+
+
+
+
+
+
+    ///////////////////////////////////////////////////
     public function destroy(Request $request): RedirectResponse
     {
         $request->validateWithBag('userDeletion', [

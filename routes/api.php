@@ -4,7 +4,9 @@ use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProfileController;
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\Request;
@@ -31,37 +33,12 @@ Route::prefix('auth/password')->middleware('guest')->group(function () {
 });
 
 Route::prefix('auth/email')->group(function () {
-    Route::get('/verify/{id}/{hash}', function (Request $request, $id, $hash) {
-        $user = User::findOrFail($id);
-
-        if (! $request->hasValidSignature()) {
-            return response()->json([
-                'message' => 'Invalid or expired verification link',
-            ], 403);
-        }
-
-        if (! hash_equals(sha1($user->getEmailForVerification()), $hash)) {
-            return response()->json([
-                'message' => 'Invalid verification hash',
-            ], 403);
-        }
-
-        if ($user->hasVerifiedEmail()) {
-            return response()->json([
-                'message' => 'Email already verified',
-            ]);
-        }
-
-        $user->markEmailAsVerified();
-        event(new Verified($user));
-
-        return response()->json([
-            'message' => 'Email verified successfully',
-        ]);
-    })
+    Route::get('/verify/{id}/{hash}',[VerifyEmailController::class,'verify'] )
         ->middleware(['signed'])
         ->name('verification.verify');
 });
+Route::post('profile', [ProfileController::class, 'store'])->middleware('auth:sanctum');
+//Route::get('profile/get', [ProfileController::class, 'show']);
 
 /*
 |--------------------------------------------------------------------------
@@ -74,12 +51,12 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::prefix('auth')->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
     });
 
     Route::prefix('auth/email')->group(function () {
         Route::post('/verification-notification', [EmailVerificationNotificationController::class, 'store'])
-            ->middleware('throttle:6,1')
+            ->middleware(['auth:sanctum','throttle:6,1'])
             ->name('verification.send');
     });
 
