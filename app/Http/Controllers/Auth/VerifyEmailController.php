@@ -11,21 +11,14 @@ use Illuminate\Http\Request;
 
 class VerifyEmailController extends Controller
 {
-    /**
-     * Mark the authenticated user's email address as verified.
-     */
-    public function verify(Request $request, $id, $hash) {
+
+    public function verify(Request $request, $id)
+    {
         $user = User::findOrFail($id);
 
         if (! $request->hasValidSignature()) {
             return response()->json([
                 'message' => 'Invalid or expired verification link',
-            ], 403);
-        }
-
-        if (! hash_equals(sha1($user->getEmailForVerification()), $hash)) {
-            return response()->json([
-                'message' => 'Invalid verification hash',
             ], 403);
         }
 
@@ -35,18 +28,86 @@ class VerifyEmailController extends Controller
             ]);
         }
 
+
+        if ($user->pending_email) {
+            $user->email = $user->pending_email;
+            $user->pending_email = null;
+        }
+
         $user->markEmailAsVerified();
-        event(new Verified($user));
+        $user->save();
 
         return response()->json([
             'message' => 'Email verified successfully',
         ]);
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // public function verify(Request $request, $id, $hash)
+    // {
+    //     $user = User::findOrFail($id);
+
+    //     if (! $request->hasValidSignature()) {
+    //         return response()->json([
+    //             'message' => 'Invalid or expired verification link',
+    //         ], 403);
+    //     }
+
+    //     if (! hash_equals(sha1($user->getEmailForVerification()), $hash)) {
+    //         return response()->json([
+    //             'message' => 'Invalid verification hash',
+    //         ], 403);
+    //     }
+
+    //     if ($user->hasVerifiedEmail()) {
+    //         return response()->json([
+    //             'message' => 'Email already verified',
+    //         ]);
+    //     }
+    //     if ($user->pending_email) {
+    //         $user->email = $user->pending_email;
+    //         $user->pending_email = null;
+    //     }
+
+    //     $user->markEmailAsVerified();
+    //     $user->save();
+
+    //     event(new \Illuminate\Auth\Events\Verified($user));
+
+    //     return response()->json([
+    //         'message' => 'Email verified and updated successfully'
+    //     ]);
+    //     // $user->markEmailAsVerified();
+    //     // event(new Verified($user));
+
+    //     // return response()->json([
+    //     //     'message' => 'Email verified successfully',
+    //     // ]);
+    // }
+
+
+
+
+
+
     public function __invoke(EmailVerificationRequest $request): RedirectResponse
     {
         if ($request->user()->hasVerifiedEmail()) {
             return redirect()->intended(
-                config('app.frontend_url').'/dashboard?verified=1'
+                config('app.frontend_url') . '/dashboard?verified=1'
             );
         }
 
@@ -55,7 +116,7 @@ class VerifyEmailController extends Controller
         }
 
         return redirect()->intended(
-            config('app.frontend_url').'/dashboard?verified=1'
+            config('app.frontend_url') . '/dashboard?verified=1'
         );
     }
 }

@@ -37,9 +37,14 @@ Route::prefix('auth/email')->group(function () {
         ->middleware(['signed'])
         ->name('verification.verify');
 });
-Route::post('profile', [ProfileController::class, 'store'])->middleware('auth:sanctum');
-//Route::get('profile/get', [ProfileController::class, 'show']);
 
+Route::prefix('profile')->middleware('auth:sanctum')->group(function () {
+Route::post('/store', [ProfileController::class, 'store']);
+Route::get('/get', [ProfileController::class, 'show']);
+Route::put('/put', [ProfileController::class, 'update']);
+
+
+});
 /*
 |--------------------------------------------------------------------------
 | Protected Routes (Sanctum)

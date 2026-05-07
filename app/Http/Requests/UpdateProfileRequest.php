@@ -4,8 +4,9 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
-class StoreProfileRequest extends FormRequest
+class UpdateProfileRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,13 +24,13 @@ class StoreProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-
-            'phone'=>'required|string|max:15',
-            'address'=>'nullable|string|max:100',
-            'date_of_birth'=>'nullable|date',
-            'bio'=>'nullable|string',
-            //'image'=>'required|image|mimes:png,jpg,jpeg,gif|max:2048',
-
+            'user_id'=>'sometimes|required|exists:users,id',
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|unique:users,email,' . Auth::id(),
+            'phone'=>'sometimes|required|string|max:15',
+            'address'=>'sometimes|nullable|string|max:100',
+            'date_of_birth'=>'sometimes|nullable|date',
+            'bio'=>'sometimes|nullable|string'
         ];
     }
 }

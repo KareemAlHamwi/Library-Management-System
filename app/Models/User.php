@@ -86,4 +86,8 @@ class User extends Authenticatable implements CanResetPassword, MustVerifyEmail
     {
         return $this->hasMany(Cart::class);
     }
+    public function getEmailForVerification()
+{
+    return $this->pending_email ?? $this->email;
+}
 }
