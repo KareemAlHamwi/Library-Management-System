@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Mail;
 
 class ProfileController extends Controller
 {
@@ -102,14 +104,23 @@ class ProfileController extends Controller
 
             $user->pending_email = $validated['email'];
             $user->email_verified_at = null;
-
-
             $user->save();
 
 
-            //$user->setAttribute('email', $user->pending_email);
+            $url = URL::temporarySignedRoute(
+                'verification.verify',
+                now()->addMinutes(60),
+                [
+                    'id' => $user->id,
+                    'hash' => sha1($user->pending_email),
+                ]
+            );
 
-            $user->sendEmailVerificationNotification();
+
+            Mail::raw("Verify your new email: " . $url, function ($message) use ($user) {
+                $message->to($user->pending_email)
+                    ->subject('Verify your new email address');
+            });
         }
 
 
@@ -151,7 +162,21 @@ class ProfileController extends Controller
             ]
         ], 200);
     }
+    public function cancelEmailChange()
+    {
+        $user = Auth::user();
 
+
+
+        $user->pending_email = null;
+        $user->email_verified_at = now();
+        $user->save();
+
+        return response()->json([
+            'message' => 'Email change cancelled successfully.',
+            'email' => $user->email
+        ]);
+    }
 
 
 
@@ -218,8 +243,7 @@ class ProfileController extends Controller
         return view('profile.edit', [
             'user' => $request->user(),
         ]);
-
-
+    }
 
     /**
      * Update the user's profile information.

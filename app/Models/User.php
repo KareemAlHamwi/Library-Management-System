@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use App\Enums\UserRole;
+use App\Notifications\CustomVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Auth\Passwords\CanResetPassword as PasswordsCanResetPassword;
 use Illuminate\Contracts\Auth\CanResetPassword;
@@ -90,4 +91,6 @@ class User extends Authenticatable implements CanResetPassword, MustVerifyEmail
 {
     return $this->pending_email ?? $this->email;
 }
+
+
 }

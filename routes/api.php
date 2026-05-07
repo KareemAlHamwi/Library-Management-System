@@ -42,6 +42,7 @@ Route::prefix('profile')->middleware('auth:sanctum')->group(function () {
 Route::post('/store', [ProfileController::class, 'store']);
 Route::get('/get', [ProfileController::class, 'show']);
 Route::put('/put', [ProfileController::class, 'update']);
+Route::post('/cancel-email-change', [ProfileController::class, 'cancelEmailChange']);
 
 
 });
