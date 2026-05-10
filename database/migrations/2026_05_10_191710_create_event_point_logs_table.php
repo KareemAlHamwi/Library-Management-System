@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('offline_saves', function (Blueprint $table) {
+        Schema::create('event_point_logs', function (Blueprint $table) {
             $table->id();
-
+            $table->foreignId('event_id')->constrained('events')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('book_id')->constrained('books')->cascadeOnDelete();
-            $table->foreignId('file_id')->constrained('book_files')->cascadeOnDelete();
-            $table->timestamp('saved_at');
+            $table->foreignId('submission_id')->constrained('event_submissions')->cascadeOnDelete();
+
+            $table->integer('points_awarded');
+            $table->string('reason');
 
             $table->timestamps();
         });
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('online_saves');
+        Schema::dropIfExists('event_point_logs');
     }
 };

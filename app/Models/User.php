@@ -5,7 +5,6 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use App\Enums\UserRole;
-use App\Notifications\CustomVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Auth\Passwords\CanResetPassword as PasswordsCanResetPassword;
 use Illuminate\Contracts\Auth\CanResetPassword;
@@ -39,23 +38,15 @@ class User extends Authenticatable implements CanResetPassword, MustVerifyEmail
             'role' => UserRole::class,
         ];
     }
+
     public function profile()
     {
         return $this->hasOne(Profile::class);
     }
+
     public function borrows(): HasMany
     {
         return $this->hasMany(Borrow::class);
-    }
-
-    public function fines(): HasMany
-    {
-        return $this->hasMany(Fine::class);
-    }
-
-    public function offlineSaves(): HasMany
-    {
-        return $this->hasMany(OfflineSave::class);
     }
 
     public function purchases(): HasMany
@@ -78,19 +69,32 @@ class User extends Authenticatable implements CanResetPassword, MustVerifyEmail
         return $this->hasMany(Review::class);
     }
 
-    public function wishlists(): HasMany
-    {
-        return $this->hasMany(Wishlist::class);
-    }
-
-    public function basketItems(): HasMany
+    public function cartItems(): HasMany
     {
         return $this->hasMany(Cart::class);
     }
+
+    public function events(): HasMany
+    {
+        return $this->hasMany(Event::class);
+    }
+
+    public function participations(): HasMany
+    {
+        return $this->hasMany(EventParticipation::class);
+    }
+
+    public function submissions(): HasMany
+    {
+        return $this->hasMany(EventSubmission::class);
+    }
+    public function eventPointLogs(): HasMany
+    {
+        return $this->hasMany(EventPointLog::class);
+    }
+
     public function getEmailForVerification()
-{
-    return $this->pending_email ?? $this->email;
-}
-
-
+    {
+        return $this->pending_email ?? $this->email;
+    }
 }

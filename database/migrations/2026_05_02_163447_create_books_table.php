@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('cover_image')->nullable();
             $table->integer('total_copies');
             $table->integer('available_copies');
+            $table->integer('total_stock_copies');
+            $table->integer('available_stock_copies');
             $table->decimal('price')->default(0);
             $table->date('published_year')->nullable();
 

@@ -18,11 +18,6 @@ class Book extends Model
         return $this->belongsToMany(Category::class);
     }
 
-    public function files(): HasMany
-    {
-        return $this->hasMany(BookFile::class);
-    }
-
     public function borrows(): HasMany
     {
         return $this->hasMany(Borrow::class);
@@ -33,23 +28,18 @@ class Book extends Model
         return $this->hasMany(Purchase::class);
     }
 
-    public function offlineSaves(): HasMany
-    {
-        return $this->hasMany(OfflineSave::class);
-    }
-
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);
     }
 
-    public function wishlists(): HasMany
-    {
-        return $this->hasMany(Wishlist::class);
-    }
-
     public function basketItems(): HasMany
     {
         return $this->hasMany(Cart::class);
+    }
+
+    public function events(): HasMany
+    {
+        return $this->hasMany(Event::class);
     }
 }
