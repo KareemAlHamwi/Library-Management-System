@@ -17,9 +17,8 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('book_id')->constrained('books')->cascadeOnDelete();
             $table->decimal('amount_paid');
-            $table->timestamp('purchased_at');
 
-            $table->timestamps();
+            $table->timestamp('created_at');
         });
     }
 

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->integer('points_awarded');
             $table->string('reason');
 
-            $table->timestamps();
+            $table->timestamp('created_at');
         });
     }
 

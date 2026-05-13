@@ -21,9 +21,9 @@ return new class extends Migration
             $table->string('prompt', 255);
             $table->text('external_link')->nullable();
             $table->enum('status', ['draft', 'open', 'closed','archived'])->default('draft');
+
             $table->timestamp('starts_at');
             $table->timestamp('ends_at');
-
             $table->timestamps();
         });
     }

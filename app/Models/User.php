@@ -2,46 +2,63 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-
 use App\Enums\UserRole;
-use Database\Factories\UserFactory;
 use Illuminate\Auth\Passwords\CanResetPassword as PasswordsCanResetPassword;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password', 'phone', 'address'])]
-#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements CanResetPassword, MustVerifyEmail
 {
-    /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable, PasswordsCanResetPassword;
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+    protected $fillable = [
+        'first_name',
+        'last_name',
+        'email',
+        'password',
+        'avatar',
+        'phone_number',
+        'address',
+        'birthdate',
+        'bio',
+        'pending_email',
+        'total_points',
+    ];
+
+    protected $hidden = [
+        'password',
+    ];
+
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
+            'birthdate' => 'date',
             'password' => 'hashed',
             'role' => UserRole::class,
         ];
     }
 
-    public function profile()
+    public function getEmailForVerification(): string
     {
-        return $this->hasOne(Profile::class);
+        return $this->pending_email ?? $this->email;
+    }
+
+    protected function avatarUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->avatar
+                ? Storage::disk('public')->url($this->avatar)
+                : null,
+        );
     }
 
     public function borrows(): HasMany
@@ -88,13 +105,9 @@ class User extends Authenticatable implements CanResetPassword, MustVerifyEmail
     {
         return $this->hasMany(EventSubmission::class);
     }
+
     public function eventPointLogs(): HasMany
     {
         return $this->hasMany(EventPointLog::class);
-    }
-
-    public function getEmailForVerification()
-    {
-        return $this->pending_email ?? $this->email;
     }
 }

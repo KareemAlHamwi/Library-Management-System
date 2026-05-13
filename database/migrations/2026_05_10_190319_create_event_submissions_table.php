@@ -16,11 +16,11 @@ return new class extends Migration
             $table->foreignId('event_id')->constrained('events')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
 
-            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->text('content');
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
 
-            $table->timestamp('submitted_at');
             $table->timestamp('reviewed_at')->nullable();
+            $table->timestamps();
         });
     }
 

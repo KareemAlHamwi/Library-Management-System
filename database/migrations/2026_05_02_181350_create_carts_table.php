@@ -16,9 +16,11 @@ return new class extends Migration
 
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('book_id')->constrained('books')->cascadeOnDelete();
-            $table->timestamp('added_at');
 
-            $table->timestamps();
+            $table->unsignedInteger('quantity')->default(1);
+
+            $table->timestamp('created_at');
+            $table->unique(['user_id', 'book_id']);
         });
     }
 

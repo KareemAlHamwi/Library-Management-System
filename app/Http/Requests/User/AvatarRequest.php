@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\User;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreProfileRequest extends FormRequest
+class AvatarRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,13 +23,13 @@ class StoreProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-
-            'phone'=>'required|string|max:15',
-            'address'=>'nullable|string|max:100',
-            'date_of_birth'=>'nullable|date',
-            'bio'=>'nullable|string',
-            //'image'=>'required|image|mimes:png,jpg,jpeg,gif|max:2048',
-
+            'avatar' => [
+                'required',
+                'file',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:2048',
+            ],
         ];
     }
 }

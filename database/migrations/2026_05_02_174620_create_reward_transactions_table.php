@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('reason', 200);
             $table->unsignedBigInteger('reference_id')->nullable();
 
-            $table->timestamps();
+            $table->timestamp('created_at');
         });
     }
 

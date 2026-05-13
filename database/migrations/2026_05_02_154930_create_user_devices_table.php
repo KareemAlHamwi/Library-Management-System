@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string('device_id');
             $table->string('platform', 20)->nullable();
             $table->string('fcm_token', 250);
-            $table->timestamp('last_seen')->nullable();
 
+            $table->timestamp('last_seen')->nullable();
             $table->timestamps();
 
             $table->unique(['user_id', 'device_id']);

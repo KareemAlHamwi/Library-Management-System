@@ -16,10 +16,9 @@ return new class extends Migration
 
             $table->foreignId('borrow_id')->constrained('borrows')->cascadeOnDelete();
             $table->decimal('amount');
-            $table->boolean('is_paid')->default(false);
-            $table->timestamp('paid_at')->nullable();
 
-            $table->timestamps();
+            $table->timestamp('paid_at')->nullable();
+            $table->timestamp('created_at');
         });
     }
 
