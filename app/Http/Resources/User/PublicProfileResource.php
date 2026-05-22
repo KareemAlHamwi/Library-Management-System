@@ -17,7 +17,6 @@ class PublicProfileResource extends JsonResource
             'birthdate' => $this->birthdate?->format('Y-m-d'),
             'bio' => $this->bio,
             'role' => $this->role->value,
-            'purchase_points' => $this->purchase_points,
             'event_points' => $this->event_points,
         ];
     }

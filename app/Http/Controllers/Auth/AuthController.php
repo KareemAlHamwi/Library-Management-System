@@ -29,7 +29,7 @@ class AuthController extends Controller
         event(new Registered($user));
 
         return response()->json([
-            'message' => 'Registered successfully. Please verify your email.',
+            'message' => __('auth.registered'),
         ], 201);
     }
 
@@ -37,7 +37,7 @@ class AuthController extends Controller
     {
         if (! Auth::attempt($request->only('email', 'password'))) {
             return response()->json([
-                'message' => 'Invalid credentials.',
+                'message' => __('auth.failed'),
             ], 401);
         }
 
@@ -47,18 +47,16 @@ class AuthController extends Controller
             Auth::guard('web')->logout();
 
             return response()->json([
-                'message' => 'Please verify your email before logging in.',
+                'message' => __('auth.verify_email'),
             ], 403);
         }
-
-        $user->tokens()->delete();
 
         $token = $this->userService->issueToken($user);
 
         return response()->json([
-            'message' => 'Logged in successfully.',
+            'message' => __('auth.logged_in'),
             'token' => $token,
-            'user'  => new UserResource($user),
+            'user' => new UserResource($user),
         ]);
     }
 
@@ -69,7 +67,7 @@ class AuthController extends Controller
         $token->delete();
 
         return response()->json([
-            'message' => 'Logged out successfully.',
+            'message' => __('auth.logged_out'),
         ]);
     }
 }

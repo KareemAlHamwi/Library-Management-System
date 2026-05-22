@@ -7,7 +7,7 @@ use App\Repositories\Contracts\User\UserRepositoryInterface;
 
 class UserRepository implements UserRepositoryInterface
 {
-    public function findById(int $id): ?User
+    public function findById(int $id): User
     {
         return User::findOrFail($id);
     }

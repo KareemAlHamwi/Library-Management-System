@@ -17,21 +17,21 @@ class VerifyEmailController extends Controller
         $user = $this->userService->findById($id);
 
         if (! $request->hasValidSignature()) {
-            return response()->json(['message' => 'Invalid or expired verification link.'], 403);
+            return response()->json(['message' => __('profile.invalid_signature')], 403);
         }
 
         $expectedEmail = $user->pending_email ?? $user->email;
         if (! hash_equals(sha1($expectedEmail), $hash)) {
-            return response()->json(['message' => 'Invalid verification link.'], 403);
+            return response()->json(['message' => __('profile.invalid_link')], 403);
         }
 
         if ($user->hasVerifiedEmail() && ! $user->pending_email) {
-            return response()->json(['message' => 'Email already verified.']);
+            return response()->json(['message' => __('profile.already_verified')]);
         }
 
         $this->userService->verifyEmail($user);
         event(new Verified($user));
 
-        return response()->json(['message' => 'Email verified successfully.']);
+        return response()->json(['message' => __('profile.verified_successfully')]);
     }
 }

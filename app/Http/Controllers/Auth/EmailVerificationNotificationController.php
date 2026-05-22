@@ -12,14 +12,14 @@ class EmailVerificationNotificationController extends Controller
     {
         if ($request->user()->hasVerifiedEmail()) {
             return response()->json([
-                'message' => 'Your email is already verified.',
+                'message' => __('profile.already_verified'),
             ]);
         }
 
         $request->user()->sendEmailVerificationNotification();
 
         return response()->json([
-            'message' => 'Verification link sent.',
+            'message' => __('profile.verification_sent'),
         ]);
     }
 }

@@ -27,7 +27,7 @@ class UserController extends Controller
         $user = $this->userService->updateUser($request->user(), $request->validated());
 
         return response()->json([
-            'message' => 'Profile updated successfully.',
+            'message' => __('profile.updated'),
             'user' => new UserResource($user),
         ]);
     }
@@ -40,7 +40,7 @@ class UserController extends Controller
         );
 
         return response()->json([
-            'message' => 'Avatar updated.',
+            'message' => __('profile.avatar_updated'),
             'avatar' => $user->avatar_url,
         ]);
     }
@@ -51,14 +51,14 @@ class UserController extends Controller
 
         if (! $user->pending_email) {
             return response()->json([
-                'message' => 'No pending email change found.',
+                'message' => __('profile.no_pending_email'),
             ], 409);
         }
 
         $this->userService->cancelEmailChange($user);
 
         return response()->json([
-            'message' => 'Email change cancelled.',
+            'message' => __('profile.email_change_cancelled'),
             'email' => $user->email,
         ]);
     }

@@ -110,4 +110,9 @@ class User extends Authenticatable implements CanResetPassword, MustVerifyEmail
     {
         return $this->hasMany(EventPointLog::class);
     }
+
+    public function devices(): HasMany
+    {
+        return $this->hasMany(UserDevice::class);
+    }
 }
