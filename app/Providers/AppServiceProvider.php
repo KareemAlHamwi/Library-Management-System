@@ -2,9 +2,12 @@
 
 namespace App\Providers;
 
+use App\Enums\UserRole;
+use App\Models\User;
 use App\Repositories\Contracts\User\UserRepositoryInterface;
 use App\Repositories\Eloquent\User\UserRepository;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -41,5 +44,9 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Schema::defaultStringLength(191);
+
+        Gate::define('is-admin', fn (User $user) => $user->role === UserRole::ADMIN);
+        Gate::define('is-supervisor', fn (User $user) => $user->role === UserRole::SUPERVISOR);
+        Gate::define('is-member', fn (User $user) => $user->role === UserRole::MEMBER);
     }
 }

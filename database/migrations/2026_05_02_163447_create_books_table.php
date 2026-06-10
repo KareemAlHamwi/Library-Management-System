@@ -13,17 +13,20 @@ return new class extends Migration
     {
         Schema::create('books', function (Blueprint $table) {
             $table->id();
-
-            $table->string('title', 255);
+            $table->string('google_volume_id')->nullable()->unique();
+            $table->string('title');
             $table->text('description')->nullable();
             $table->string('cover_image')->nullable();
-            $table->integer('total_copies');
-            $table->integer('available_copies');
-            $table->integer('total_stock_copies');
-            $table->integer('available_stock_copies');
-            $table->decimal('price')->default(0);
-            $table->date('published_year')->nullable();
-
+            $table->string('publisher')->nullable();
+            $table->string('published_date')->nullable();
+            $table->integer('page_count')->nullable();
+            $table->string('isbn')->nullable()->unique();
+            $table->string('language')->nullable();
+            $table->integer('total_copies')->default(0);
+            $table->integer('available_copies')->default(0);
+            $table->integer('total_stock_copies')->default(0);
+            $table->integer('available_stock_copies')->default(0);
+            $table->bigInteger('price')->default(0);
             $table->timestamps();
         });
     }
