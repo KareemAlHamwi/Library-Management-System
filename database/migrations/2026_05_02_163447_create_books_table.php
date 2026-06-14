@@ -27,6 +27,8 @@ return new class extends Migration
             $table->integer('total_stock_copies')->default(0);
             $table->integer('available_stock_copies')->default(0);
             $table->bigInteger('price')->default(0);
+            $table->decimal('overall_rating', 3, 2)->default(0);
+            $table->unsignedInteger('reviewers_count')->default(0);
             $table->timestamps();
         });
     }

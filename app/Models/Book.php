@@ -8,14 +8,31 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Book extends Model
 {
+    protected $fillable = [
+        'google_volume_id',
+        'title',
+        'description',
+        'cover_image',
+        'publisher',
+        'published_date',
+        'page_count',
+        'isbn',
+        'language',
+        'price',
+        'total_copies',
+        'available_copies',
+        'total_stock_copies',
+        'available_stock_copies',
+    ];
+
     public function authors(): BelongsToMany
     {
-        return $this->belongsToMany(Author::class);
+        return $this->belongsToMany(Author::class, 'book_author');
     }
 
     public function categories(): BelongsToMany
     {
-        return $this->belongsToMany(Category::class);
+        return $this->belongsToMany(Category::class, 'book_category');
     }
 
     public function borrows(): HasMany

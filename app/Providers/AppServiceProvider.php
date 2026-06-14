@@ -4,7 +4,9 @@ namespace App\Providers;
 
 use App\Enums\UserRole;
 use App\Models\User;
+use App\Repositories\Contracts\Book\BookRepositoryInterface;
 use App\Repositories\Contracts\User\UserRepositoryInterface;
+use App\Repositories\Eloquent\Book\BookRepository;
 use App\Repositories\Eloquent\User\UserRepository;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Gate;
@@ -22,6 +24,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             UserRepositoryInterface::class,
             UserRepository::class
+        );
+        $this->app->bind(
+            BookRepositoryInterface::class,
+            BookRepository::class
         );
     }
 

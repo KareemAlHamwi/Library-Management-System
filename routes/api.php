@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\Book\BooksController;
 use App\Http\Controllers\Book\GoogleBooksController;
 use App\Http\Controllers\User\UserController;
 use Illuminate\Support\Facades\Route;
@@ -53,8 +54,21 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/cancel-email-change', [UserController::class, 'cancelEmailChange']);
     });
 
-    Route::prefix('books')->middleware(['verified', 'can:is-admin'])->group(function () {
-        Route::get('/google/search', [GoogleBooksController::class, 'search']);
-        Route::get('/google/{volumeId}', [GoogleBooksController::class, 'getVolume']);
+    Route::prefix('books')->middleware('verified')->group(function () {
+        Route::get('/', [BooksController::class, 'list']);
+        Route::get('/recommended', [BooksController::class, 'recommended']);
+        Route::get('/new-arrivals', [BooksController::class, 'newArrivals']);
+        Route::get('/popular', [BooksController::class, 'popular']);
+        Route::get('/{bookId}', [BooksController::class, 'get']);
+
+        Route::middleware('can:is-admin')->group(function () {
+            Route::post('/', [BooksController::class, 'add']);
+            Route::put('/{bookId}', [BooksController::class, 'update']);
+        });
+    });
+
+    Route::prefix('books/google')->middleware(['verified', 'can:is-admin'])->group(function () {
+        Route::get('/search', [GoogleBooksController::class, 'search']);
+        Route::get('/{volumeId}', [GoogleBooksController::class, 'getVolume']);
     });
 });
