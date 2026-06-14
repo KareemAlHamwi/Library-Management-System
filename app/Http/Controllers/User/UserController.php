@@ -62,4 +62,9 @@ class UserController extends Controller
             'email' => $user->email,
         ]);
     }
+
+    public function getCurrentUser()
+    {
+        return response()->json(new UserResource(auth()->user()));
+    }
 }
