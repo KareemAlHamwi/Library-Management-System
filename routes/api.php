@@ -9,6 +9,9 @@ use App\Http\Controllers\Book\BooksController;
 use App\Http\Controllers\Book\GoogleBooksController;
 use App\Http\Controllers\User\UserController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Cart\CartController;
+use App\Http\Controllers\Purchase\PurchaseController;
+use App\Http\Controllers\Wallet\WalletController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,7 +40,24 @@ Route::prefix('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth:sanctum')->group(function () {
+    /////////////////////////Cart
+    Route::prefix('cart')->group(function () {
+    Route::get('/', [CartController::class, 'index']);
+    Route::post('/add', [CartController::class, 'add']);
+    Route::put('/{book}', [CartController::class, 'update']);
+    Route::delete('/{book}', [CartController::class, 'remove']);
+    Route::delete('/', [CartController::class, 'clear']);});
+////////////////////////////////////////////////
 
+ // Wallet Routes
+    Route::get('/wallet', [WalletController::class, 'index']);
+    Route::get('/wallet/balance', [WalletController::class, 'balance']);
+    Route::get('/wallet/transactions', [WalletController::class, 'transactions']);
+    Route::get('/wallet/transactions/{type}', [WalletController::class, 'transactionsByType']);
+
+    // Purchase Routes
+    Route::post('/purchase/checkout', [PurchaseController::class, 'checkout']);
+//////////////////////////////////////////////////
     Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
 
@@ -64,6 +84,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::middleware('can:is-admin')->group(function () {
             Route::post('/', [BooksController::class, 'add']);
             Route::put('/{bookId}', [BooksController::class, 'update']);
+
+            ////
+         //   Route::post('/category', [BooksController::class, 'storeCategory']);
         });
     });
 

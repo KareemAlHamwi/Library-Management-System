@@ -8,6 +8,8 @@ use App\Http\Requests\Book\ListBooksRequest;
 use App\Http\Requests\Book\UpdateBookRequest;
 use App\Http\Resources\Book\BookListResource;
 use App\Http\Resources\Book\BookResource;
+use App\Models\Book;
+use App\Models\Category;
 use App\Services\Book\BooksService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -75,4 +77,29 @@ class BooksController extends Controller
             $this->booksService->update($book, $request->validated())
         ));
     }
+
+
+
+
+
+
+
+
+    ////////////////////////////////////
+    // public function getBookCategories($bookId)
+    // {
+    //     $categories = Book::findOrfail($bookId)->categories;
+    //     return response()->json($categories, 200);
+    // }
+    // public function addCategoriesToBook(Request $request, $bookId)
+    // {
+    //     $book = Book::findOrfail($bookId);
+    //     $book->categories()->attach($request->category_id);
+    //     return response()->json('Category add successfuly', 200);
+    // }
+    // public function getCategoryTasks($categoryId)
+    // {
+    //     $books = Category::findOrfail($categoryId)->books;
+    //     return response()->json($books, 200);
+    // }
 }
