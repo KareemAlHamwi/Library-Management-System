@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Purchase;
 
 use App\Http\Controllers\Controller;
-use App\Models\Book;
 use App\Services\Cart\CartService;
 use App\Services\Wallet\WalletService;
 use Illuminate\Http\JsonResponse;
@@ -28,64 +27,101 @@ class PurchaseController extends Controller
     {
         try {
             $user = Auth::user();
+
+            // 1. جلب عناصر السلة
             $cartItems = $this->cartService->getCartItems($user);
 
+            // ✅ التحقق من أن السلة ليست فارغة
             if ($cartItems->isEmpty()) {
                 return response()->json([
-                    'message' => 'السلة فارغة'
+                    'message' => 'السلة فارغة، أضف كتباً أولاً'
                 ], 400);
             }
 
-            // حساب الإجمالي
+            // 2. حساب الإجمالي
             $total = $this->cartService->getCartTotal($user);
 
-            // الحصول على المحفظة
+            // ✅ التحقق من أن المبلغ أكبر من صفر
+            if ($total <= 0) {
+                return response()->json([
+                    'message' => 'لا يمكن الشراء بمبلغ صفر',
+                    'total' => $total,
+                    'cart_items' => $cartItems->map(function ($item) {
+                        return [
+                            'book_id' => $item->book_id,
+                            'title' => $item->book->title ?? 'Unknown',
+                            'quantity' => $item->quantity,
+                            'price' => $item->book->price ?? 0,
+                            'subtotal' => ($item->quantity * ($item->book->price ?? 0))
+                        ];
+                    })
+                ], 400);
+            }
+
+            // 3. الحصول على المحفظة
             $wallet = $this->walletService->getOrCreateWallet($user);
 
-            // التحقق من الرصيد
+            // 4. التحقق من الرصيد
             if (!$this->walletService->hasSufficientBalance($wallet, $total)) {
                 return response()->json([
                     'message' => 'الرصيد غير كافٍ',
                     'balance' => $wallet->balance,
-                    'required' => $total
+                    'required' => $total,
+                    'difference' => $total - $wallet->balance
                 ], 400);
             }
 
-            // تنفيذ الشراء في ترانزاكشن
-            DB::transaction(function () use ($user, $cartItems, $total, $wallet) {
-                // 1. إنشاء معاملة السحب
+            // 5. تنفيذ الشراء في ترانزاكشن
+            $transaction = DB::transaction(function () use ($user, $cartItems, $total, $wallet) {
+                // 5.1 إنشاء معاملة السحب
                 $transaction = $this->walletService->withdraw($wallet, $total, 'purchase', null);
 
-                // 2. إنشاء سجلات الشراء وتحديث المخزون
+                // 5.2 إنشاء سجلات الشراء وتحديث المخزون
+                $purchaseIds = [];
                 foreach ($cartItems as $item) {
+                    // التحقق من أن الكتاب موجود
+                    if (!$item->book) {
+                        throw new \Exception("الكتاب غير موجود: ID {$item->book_id}");
+                    }
+
+                    // التحقق من المخزون
+                    if ($item->book->available_stock_copies < $item->quantity) {
+                        throw new \Exception("الكتاب '{$item->book->title}' غير متوفر بهذه الكمية");
+                    }
+
                     // إنشاء سجل الشراء
                     $purchase = $user->purchases()->create([
                         'book_id' => $item->book_id,
                         'amount_paid' => $item->quantity * $item->book->price
                     ]);
 
-                    // تحديث مرجع المعاملة بمعرف الشراء الأول (اختياري)
-                    if ($transaction->reference_id === null) {
-                        $transaction->update(['reference_id' => $purchase->id]);
-                    }
+                    $purchaseIds[] = $purchase->id;
 
                     // تقليل المخزون
                     $item->book->decrement('available_stock_copies', $item->quantity);
                 }
 
-                // 3. تفريغ السلة
+                // تحديث مرجع المعاملة بأول purchase_id
+                $transaction->update(['reference_id' => $purchaseIds[0] ?? null]);
+
+                // 5.3 تفريغ السلة
                 $this->cartService->clearCart($user);
+
+                return $transaction;
             });
 
             return response()->json([
-                'message' => 'تمت عملية الشراء بنجاح',
+                'message' => 'تمت عملية الشراء بنجاح 🎉',
                 'amount_paid' => $total,
-                'remaining_balance' => $wallet->fresh()->balance
+                'remaining_balance' => $wallet->fresh()->balance,
+                'transaction_id' => $transaction->id,
+                'items_purchased' => $cartItems->count()
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
+                'trace' => config('app.debug') ? $e->getTraceAsString() : null
             ], 500);
         }
     }

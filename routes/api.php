@@ -12,12 +12,13 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cart\CartController;
 use App\Http\Controllers\Purchase\PurchaseController;
 use App\Http\Controllers\Wallet\WalletController;
-
+use App\Http\Controllers\Reward\RewardController;
 /*
 |--------------------------------------------------------------------------
 | Public Routes
 |--------------------------------------------------------------------------
 */
+
 Route::prefix('auth')->group(function () {
     Route::middleware('throttle:10,1')->group(function () {
         Route::post('/register', [AuthController::class, 'register'])->name('register');
@@ -42,22 +43,28 @@ Route::prefix('auth')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     /////////////////////////Cart
     Route::prefix('cart')->group(function () {
-    Route::get('/', [CartController::class, 'index']);
-    Route::post('/add', [CartController::class, 'add']);
-    Route::put('/{book}', [CartController::class, 'update']);
-    Route::delete('/{book}', [CartController::class, 'remove']);
-    Route::delete('/', [CartController::class, 'clear']);});
-////////////////////////////////////////////////
+        Route::get('/', [CartController::class, 'index']);
+        Route::post('/add', [CartController::class, 'add']);
+        Route::put('/{book}', [CartController::class, 'update']);
+        Route::delete('/{book}', [CartController::class, 'remove']);
+        Route::delete('/', [CartController::class, 'clear']);
+    });
+    ////////////////////////////////////////////////
 
- // Wallet Routes
+    // Wallet Routes
     Route::get('/wallet', [WalletController::class, 'index']);
     Route::get('/wallet/balance', [WalletController::class, 'balance']);
     Route::get('/wallet/transactions', [WalletController::class, 'transactions']);
     Route::get('/wallet/transactions/{type}', [WalletController::class, 'transactionsByType']);
+    Route::post('/wallet/deposit', [WalletController::class, 'deposit']);
 
     // Purchase Routes
     Route::post('/purchase/checkout', [PurchaseController::class, 'checkout']);
-//////////////////////////////////////////////////
+    // ==================== Reward Routes ====================
+    Route::get('/reward/balance', [RewardController::class, 'balance']);
+    Route::get('/reward/history', [RewardController::class, 'history']);
+    Route::post('/reward/redeem', [RewardController::class, 'redeem']);
+    //////////////////////////////////////////////////
     Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
 
@@ -65,6 +72,8 @@ Route::middleware('auth:sanctum')->group(function () {
             ->middleware('throttle:6,1')
             ->name('verification.send');
     });
+    ///////////////////////////////////
+
 
     Route::prefix('user')->middleware('verified')->group(function () {
         Route::get('/me', [UserController::class, 'getCurrentUser']);
@@ -86,7 +95,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('/{bookId}', [BooksController::class, 'update']);
 
             ////
-         //   Route::post('/category', [BooksController::class, 'storeCategory']);
+            //   Route::post('/category', [BooksController::class, 'storeCategory']);
         });
     });
 

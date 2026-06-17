@@ -34,12 +34,16 @@ class WalletService
      */
     public function deposit(Wallet $wallet, float $amount, string $referenceType = null, int $referenceId = null): Transaction
     {
+        if ($amount <= 0) {
+            throw new \Exception('المبلغ يجب أن يكون أكبر من صفر');
+        }
+
         return DB::transaction(function () use ($wallet, $amount, $referenceType, $referenceId) {
             // إنشاء المعاملة
             $transaction = Transaction::create([
                 'wallet_id' => $wallet->id,
                 'amount' => $amount,
-                'type' => 'credit', // إيداع
+                'type' => 'credit',
                 'status' => 'completed',
                 'reference_type' => $referenceType,
                 'reference_id' => $referenceId
@@ -57,6 +61,10 @@ class WalletService
      */
     public function withdraw(Wallet $wallet, float $amount, string $referenceType = null, int $referenceId = null): Transaction
     {
+        if ($amount <= 0) {
+            throw new \Exception('المبلغ يجب أن يكون أكبر من صفر');
+        }
+
         // التحقق من الرصيد
         if ($wallet->balance < $amount) {
             throw new \Exception('الرصيد غير كافٍ');
@@ -67,7 +75,7 @@ class WalletService
             $transaction = Transaction::create([
                 'wallet_id' => $wallet->id,
                 'amount' => $amount,
-                'type' => 'debit', // سحب
+                'type' => 'debit',
                 'status' => 'completed',
                 'reference_type' => $referenceType,
                 'reference_id' => $referenceId

@@ -8,6 +8,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class RewardTransaction extends Model
 {
+    protected $fillable = [
+        'user_id',
+        'points',
+        'type',
+        'reason',
+        'reference_id'
+    ];
     protected $casts = [
         'type' => RewardType::class,
     ];

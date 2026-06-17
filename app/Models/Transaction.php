@@ -12,8 +12,16 @@ class Transaction extends Model
     protected $casts = [
         'type' => TransactionType::class,
         'status' => TransactionStatus::class,
+        'amount' => 'decimal:2'
     ];
-
+    protected $fillable = [
+        'wallet_id',
+        'amount',
+        'type',
+        'status',
+        'reference_type',
+        'reference_id'
+    ];
     public function wallet(): BelongsTo
     {
         return $this->belongsTo(Wallet::class);

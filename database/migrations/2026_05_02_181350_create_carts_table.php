@@ -19,7 +19,7 @@ return new class extends Migration
 
             $table->unsignedInteger('quantity')->default(1);
 
-            $table->timestamp('created_at');
+            $table->timestamps();
             $table->unique(['user_id', 'book_id']);
         });
     }

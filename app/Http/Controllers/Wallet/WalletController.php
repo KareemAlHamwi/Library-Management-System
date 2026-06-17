@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Wallet;
 use App\Http\Controllers\Controller;
 use App\Services\Wallet\WalletService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class WalletController extends Controller
@@ -75,5 +76,43 @@ class WalletController extends Controller
             'balance' => $wallet->balance,
             'currency' => $wallet->currency
         ]);
+    }
+
+    public function deposit(Request $request): JsonResponse
+    {
+        try {
+            // 1. الحصول على المستخدم الحالي
+            $user = Auth::user();
+
+            // 2. الحصول على محفظة المستخدم (أو إنشاؤها)
+            $wallet = $this->walletService->getOrCreateWallet($user);
+
+            // 3. التحقق من صحة البيانات
+            $request->validate([
+                'amount' => 'required|numeric|min:0.01',
+                'currency' => 'nullable|in:SYP,USD' // اختياري
+            ]);
+
+            // 4. ✅ استخدام دالة deposit من الـ Service
+            $transaction = $this->walletService->deposit(
+                $wallet,
+                $request->amount,
+                'manual_deposit',  // نوع المرجع
+                null               // معرف المرجع
+            );
+
+            // 5. إرجاع الرد
+            return response()->json([
+                'message' => 'تم شحن المحفظة بنجاح',
+                'amount' => $request->amount,
+                'new_balance' => $wallet->fresh()->balance,
+                'currency' => $wallet->currency,
+                'transaction' => $transaction
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 400);
+        }
     }
 }

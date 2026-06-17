@@ -8,6 +8,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Wallet extends Model
 {
+    protected $fillable = [
+        'user_id',
+        'balance',
+        'currency'
+    ];
+    protected $casts = [
+        'balance' => 'decimal:2'
+    ];
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

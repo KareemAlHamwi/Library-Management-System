@@ -44,9 +44,17 @@ class CartController extends Controller
                 $request->quantity ?? 1
             );
 
+            // ✅ التأكد من أن quantity رقم
             return response()->json([
                 'message' => 'تم إضافة الكتاب للسلة بنجاح',
-                'cart_item' => $cartItem
+                'cart_item' => [
+                    'id' => $cartItem->id,
+                    'user_id' => $cartItem->user_id,
+                    'book_id' => $cartItem->book_id,
+                    'quantity' => (int) $cartItem->quantity, // ✅ تحويل إلى رقم
+                    'created_at' => $cartItem->created_at,
+                    'updated_at' => $cartItem->updated_at ?? null
+                ]
             ], 201);
 
         } catch (\Exception $e) {

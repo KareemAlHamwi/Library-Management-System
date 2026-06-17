@@ -16,16 +16,29 @@ class CartService
             throw new \Exception('الكتاب غير متوفر بهذه الكمية');
         }
 
-        // إضافة أو تحديث الكمية
-        return Cart::updateOrCreate(
-            [
-                'user_id' => $user->id,
-                'book_id' => $book->id
-            ],
-            [
-                'quantity' => DB::raw("quantity + $quantity")
-            ]
-        );
+        // البحث عن العنصر في السلة
+        $cart = Cart::where('user_id', $user->id)
+            ->where('book_id', $book->id)
+            ->first();
+
+        if ($cart) {
+            // ✅ استخدام increment بدلاً من manual update
+            $cart->increment('quantity', $quantity);
+
+            // ✅ تحديث الكائن للحصول على القيمة الجديدة
+            $cart->refresh();
+
+            return $cart;
+        }
+
+        // إذا لم يكن موجوداً، أنشئ جديداً
+        $cart = Cart::create([
+            'user_id' => $user->id,
+            'book_id' => $book->id,
+            'quantity' => $quantity
+        ]);
+
+        return $cart;
     }
 
     public function removeFromCart(User $user, Book $book)
@@ -83,6 +96,6 @@ class CartService
             ->where('book_id', $book->id)
             ->first();
 
-        return $cart ? $cart->quantity : 0;
+        return $cart ? (int) $cart->quantity : 0;
     }
 }

@@ -21,6 +21,10 @@ class RewardTransactionService
      */
     public function addPoints(User $user, int $points, string $reason, int $referenceId = null): RewardTransaction
     {
+        if ($points <= 0) {
+            throw new \Exception('النقاط يجب أن تكون أكبر من صفر');
+        }
+
         return DB::transaction(function () use ($user, $points, $reason, $referenceId) {
             // 1. إنشاء سجل النقاط
             $reward = RewardTransaction::create([
@@ -48,8 +52,9 @@ class RewardTransactionService
             throw new \Exception('النقاط غير كافية');
         }
 
-        // التحقق من أن النقاط قابلة للصرف (مثلاً 100 نقطة = 10 دولار)
-        $amount = $points / 10; // 10 نقاط = 1 دولار
+        // التحقق من أن النقاط قابلة للصرف (مثلاً 10 نقاط = 1 دولار)
+        $conversionRate = 10; // 10 نقاط = 1 دولار
+        $amount = $points / $conversionRate;
 
         DB::transaction(function () use ($user, $points, $amount) {
             // 1. إنشاء سجل صرف النقاط
