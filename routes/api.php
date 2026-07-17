@@ -5,8 +5,10 @@ use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\Author\AuthorsController;
 use App\Http\Controllers\Book\BooksController;
 use App\Http\Controllers\Book\GoogleBooksController;
+use App\Http\Controllers\Category\CategoryController;
 use App\Http\Controllers\User\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -64,11 +66,33 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::middleware('can:is-admin')->group(function () {
             Route::post('/', [BooksController::class, 'add']);
             Route::put('/{bookId}', [BooksController::class, 'update']);
+            Route::delete('/{authorId}', [BooksController::class, 'delete']);
         });
     });
 
     Route::prefix('books/google')->middleware(['verified', 'can:is-admin'])->group(function () {
         Route::get('/search', [GoogleBooksController::class, 'search']);
         Route::get('/{volumeId}', [GoogleBooksController::class, 'getVolume']);
+    });
+
+    Route::prefix('authors')->middleware('verified')->group(function () {
+        Route::get('/', [AuthorsController::class, 'list']);
+        Route::get('/{authorId}', [AuthorsController::class, 'get']);
+
+        Route::middleware('can:is-admin')->group(function () {
+            Route::post('/', [AuthorsController::class, 'add']);
+            Route::put('/{authorId}', [AuthorsController::class, 'update']);
+            Route::delete('/{authorId}', [AuthorsController::class, 'delete']);
+        });
+    });
+
+    Route::prefix('categories')->middleware('verified')->group(function () {
+        Route::get('/', [CategoryController::class, 'list']);
+        Route::get('/{categoryId}', [CategoryController::class, 'get']);
+
+        Route::middleware('can:is-admin')->group(function () {
+            Route::post('/', [CategoryController::class, 'add']);
+            Route::delete('/{categoryId}', [CategoryController::class, 'delete']);
+        });
     });
 });

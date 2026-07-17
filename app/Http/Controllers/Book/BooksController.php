@@ -75,4 +75,17 @@ class BooksController extends Controller
             $this->booksService->update($book, $request->validated())
         ));
     }
+
+    public function delete(int $authorId): JsonResponse
+    {
+        $author = $this->booksService->get($authorId);
+
+        if (! $author) {
+            return response()->json(['message' => __('books.book_not_found')], 404);
+        }
+
+        $this->booksService->delete($author);
+
+        return response()->json(['message' => __('books.book_deleted')]);
+    }
 }

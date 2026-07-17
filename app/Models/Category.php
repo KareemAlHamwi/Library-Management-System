@@ -7,6 +7,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Category extends Model
 {
+    protected $fillable = ['name'];
+
+    protected $casts = [
+        'name' => 'array',
+    ];
+
     public function books(): BelongsToMany
     {
         return $this->belongsToMany(Book::class);

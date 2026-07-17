@@ -20,4 +20,6 @@ interface BookRepositoryInterface
     public function create(array $data): Book;
 
     public function update(Book $book, array $data): Book;
+
+    public function delete(Book $book): void;
 }
