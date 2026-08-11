@@ -30,6 +30,8 @@ return new class extends Migration
 
             $table->integer('purchase_points')->default(0);
             $table->integer('event_points')->default(0);
+            $table->integer('loyalty_points')->default(0);
+
 
             $table->timestamps();
         });

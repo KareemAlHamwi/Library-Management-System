@@ -11,27 +11,27 @@ class CartService
 {
     public function addToCart(User $user, Book $book, int $quantity = 1)
     {
-        // التحقق من توفر الكتاب
+
         if ($book->available_stock_copies < $quantity) {
-            throw new \Exception('الكتاب غير متوفر بهذه الكمية');
+            throw new \Exception('The book is not available in this quantity.');
         }
 
-        // البحث عن العنصر في السلة
+
         $cart = Cart::where('user_id', $user->id)
             ->where('book_id', $book->id)
             ->first();
 
         if ($cart) {
-            // ✅ استخدام increment بدلاً من manual update
+
             $cart->increment('quantity', $quantity);
 
-            // ✅ تحديث الكائن للحصول على القيمة الجديدة
+
             $cart->refresh();
 
             return $cart;
         }
 
-        // إذا لم يكن موجوداً، أنشئ جديداً
+
         $cart = Cart::create([
             'user_id' => $user->id,
             'book_id' => $book->id,
@@ -55,7 +55,7 @@ class CartService
         }
 
         if ($book->available_stock_copies < $quantity) {
-            throw new \Exception('الكمية المطلوبة غير متوفرة');
+            throw new \Exception('The requested quantity is not available.');
         }
 
         return Cart::where('user_id', $user->id)

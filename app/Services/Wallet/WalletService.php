@@ -5,13 +5,13 @@ namespace App\Services\Wallet;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Models\Transaction;
+use App\Models\TopUpRequest;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 
 class WalletService
 {
-    /**
-     * إنشاء محفظة للمستخدم الجديد
-     */
+
     public function createWallet(User $user, string $currency = 'SYP'): Wallet
     {
         return Wallet::create([
@@ -21,25 +21,20 @@ class WalletService
         ]);
     }
 
-    /**
-     * الحصول على محفظة المستخدم (أو إنشاؤها إذا لم توجد)
-     */
+
     public function getOrCreateWallet(User $user): Wallet
     {
         return $user->wallet ?? $this->createWallet($user);
     }
 
-    /**
-     * إضافة رصيد للمحفظة (إيداع)
-     */
+
     public function deposit(Wallet $wallet, float $amount, string $referenceType = null, int $referenceId = null): Transaction
     {
         if ($amount <= 0) {
-            throw new \Exception('المبلغ يجب أن يكون أكبر من صفر');
+            throw new \Exception('The amount must be greater than zero.');
         }
 
         return DB::transaction(function () use ($wallet, $amount, $referenceType, $referenceId) {
-            // إنشاء المعاملة
             $transaction = Transaction::create([
                 'wallet_id' => $wallet->id,
                 'amount' => $amount,
@@ -49,29 +44,24 @@ class WalletService
                 'reference_id' => $referenceId
             ]);
 
-            // تحديث الرصيد
             $wallet->increment('balance', $amount);
 
             return $transaction;
         });
     }
 
-    /**
-     * سحب رصيد من المحفظة
-     */
+
     public function withdraw(Wallet $wallet, float $amount, string $referenceType = null, int $referenceId = null): Transaction
     {
         if ($amount <= 0) {
-            throw new \Exception('المبلغ يجب أن يكون أكبر من صفر');
+            throw new \Exception('The amount must be greater than zero.');
         }
 
-        // التحقق من الرصيد
         if ($wallet->balance < $amount) {
-            throw new \Exception('الرصيد غير كافٍ');
+            throw new \Exception('Insufficient balance');
         }
 
         return DB::transaction(function () use ($wallet, $amount, $referenceType, $referenceId) {
-            // إنشاء المعاملة
             $transaction = Transaction::create([
                 'wallet_id' => $wallet->id,
                 'amount' => $amount,
@@ -81,24 +71,96 @@ class WalletService
                 'reference_id' => $referenceId
             ]);
 
-            // تحديث الرصيد
             $wallet->decrement('balance', $amount);
 
             return $transaction;
         });
     }
 
-    /**
-     * الحصول على رصيد المحفظة
-     */
+
+    public function requestTopUp(User $user, float $amount, string $paymentMethod = null): TopUpRequest
+    {
+        if ($amount <= 0) {
+            throw new \Exception('The amount must be greater than zero.');
+        }
+
+        $request = TopUpRequest::create([
+            'user_id' => $user->id,
+            'amount' => $amount,
+            'payment_method' => $paymentMethod ?? 'bank_transfer',
+            'status' => 'pending',
+            'requested_at' => now()
+        ]);
+
+        return $request;
+    }
+
+
+    public function approveTopUp(TopUpRequest $topUpRequest): Transaction
+    {
+        if ($topUpRequest->status !== 'pending') {
+            throw new \Exception('This request has already been processed.');
+        }
+
+        $user = $topUpRequest->user;
+        $amount = $topUpRequest->amount;
+
+        return DB::transaction(function () use ($user, $amount, $topUpRequest) {
+            $wallet = $this->getOrCreateWallet($user);
+            $transaction = $this->deposit(
+                $wallet,
+                $amount,
+                'top_up_approved',
+                $topUpRequest->id
+            );
+
+            $topUpRequest->update([
+                'status' => 'approved',
+                'approved_at' => now(),
+                'approved_by' => auth()->id()
+            ]);
+
+            return $transaction;
+        });
+    }
+
+
+    public function rejectTopUp(TopUpRequest $topUpRequest, string $reason = null): void
+    {
+        if ($topUpRequest->status !== 'pending') {
+            throw new \Exception('This request has already been processed.');
+        }
+
+        $topUpRequest->update([
+            'status' => 'rejected',
+            'rejected_at' => now(),
+            'rejected_by' => auth()->id(),
+            'rejection_reason' => $reason
+        ]);
+    }
+
+
+    public function getUserTopUpRequests(User $user)
+    {
+        return TopUpRequest::where('user_id', $user->id)
+            ->orderBy('requested_at', 'desc')
+            ->get();
+    }
+
+
+    public function getAllTopUpRequests()
+    {
+        return TopUpRequest::with('user')
+            ->orderBy('requested_at', 'desc')
+            ->get();
+    }
+
+
     public function getBalance(Wallet $wallet): float
     {
         return $wallet->balance;
     }
 
-    /**
-     * الحصول على تاريخ المعاملات
-     */
     public function getTransactions(Wallet $wallet, int $limit = 50)
     {
         return $wallet->transactions()
@@ -107,9 +169,7 @@ class WalletService
             ->get();
     }
 
-    /**
-     * الحصول على معاملات محددة النوع
-     */
+
     public function getTransactionsByType(Wallet $wallet, string $type, int $limit = 50)
     {
         return $wallet->transactions()
@@ -119,25 +179,19 @@ class WalletService
             ->get();
     }
 
-    /**
-     * التحقق من كفاية الرصيد
-     */
+
     public function hasSufficientBalance(Wallet $wallet, float $amount): bool
     {
         return $wallet->balance >= $amount;
     }
 
-    /**
-     * إضافة رصيد كمكافأة (من Reward Transactions)
-     */
+
     public function depositFromReward(Wallet $wallet, float $amount, int $rewardTransactionId): Transaction
     {
         return $this->deposit($wallet, $amount, 'reward', $rewardTransactionId);
     }
 
-    /**
-     * سحب رصيد للشراء (من Purchases)
-     */
+
     public function withdrawForPurchase(Wallet $wallet, float $amount, int $purchaseId): Transaction
     {
         return $this->withdraw($wallet, $amount, 'purchase', $purchaseId);

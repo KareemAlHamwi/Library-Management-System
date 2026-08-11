@@ -44,14 +44,14 @@ class CartController extends Controller
                 $request->quantity ?? 1
             );
 
-            // ✅ التأكد من أن quantity رقم
+
             return response()->json([
-                'message' => 'تم إضافة الكتاب للسلة بنجاح',
+                'message' => 'The book has been successfully added to the cart.',
                 'cart_item' => [
                     'id' => $cartItem->id,
                     'user_id' => $cartItem->user_id,
                     'book_id' => $cartItem->book_id,
-                    'quantity' => (int) $cartItem->quantity, // ✅ تحويل إلى رقم
+                    'quantity' => (int) $cartItem->quantity,
                     'created_at' => $cartItem->created_at,
                     'updated_at' => $cartItem->updated_at ?? null
                 ]
@@ -76,7 +76,7 @@ class CartController extends Controller
             );
 
             return response()->json([
-                'message' => 'تم تحديث الكمية بنجاح'
+                'message' => 'The quantity has been successfully updated.'
             ]);
 
         } catch (\Exception $e) {
@@ -93,7 +93,7 @@ class CartController extends Controller
         $this->cartService->removeFromCart($user, $book);
 
         return response()->json([
-            'message' => 'تم حذف الكتاب من السلة'
+            'message' => 'The book has been removed from the cart.'
         ]);
     }
 
@@ -104,7 +104,7 @@ class CartController extends Controller
         $this->cartService->clearCart($user);
 
         return response()->json([
-            'message' => 'تم تفريغ السلة بنجاح'
+            'message' => 'The basket has been successfully emptied.'
         ]);
     }
 }

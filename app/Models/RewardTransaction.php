@@ -13,14 +13,31 @@ class RewardTransaction extends Model
         'points',
         'type',
         'reason',
-        'reference_id'
+        'reference_id',
+        'created_at'
     ];
+        // ✅ منع استخدام updated_at
+    public $timestamps = false;
+
+    // ✅ تحديد created_at فقط
+    const CREATED_AT = 'created_at';
+    const UPDATED_AT = null;
+
     protected $casts = [
         'type' => RewardType::class,
+        'points' => 'integer'
     ];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+    protected static function booted()
+    {
+        static::creating(function ($reward) {
+            if (empty($reward->created_at)) {
+                $reward->created_at = now();
+            }
+        });
     }
 }

@@ -43,13 +43,13 @@ class AuthController extends Controller
 
         $user = Auth::user();
 
-        if (! $user->hasVerifiedEmail()) {
-            Auth::guard('web')->logout();
+        // if (! $user->hasVerifiedEmail()) {
+        //     Auth::guard('web')->logout();
 
-            return response()->json([
-                'message' => __('auth.verify_email'),
-            ], 403);
-        }
+        //     return response()->json([
+        //         'message' => __('auth.verify_email'),
+        //     ], 403);
+        // }
 
         $token = $this->userService->issueToken($user);
 

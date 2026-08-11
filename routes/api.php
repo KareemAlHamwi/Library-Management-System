@@ -57,13 +57,56 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/wallet/transactions', [WalletController::class, 'transactions']);
     Route::get('/wallet/transactions/{type}', [WalletController::class, 'transactionsByType']);
     Route::post('/wallet/deposit', [WalletController::class, 'deposit']);
+    Route::post('/wallet/request-topup', [WalletController::class, 'requestTopUp']);
+    Route::get('/wallet/my-topup-requests', [WalletController::class, 'myTopUpRequests']);
+
+
+
+     // Reward Routes (User)
+    Route::post('/reward/request-convert', [RewardController::class, 'requestConversion']);
+    Route::get('/reward/my-requests', [RewardController::class, 'myConversionRequests']);
+    Route::get('/reward/balance', [RewardController::class, 'balance']);
+    Route::get('/reward/history', [RewardController::class, 'history']);
+
+    // ==================== Routes للأدمن فقط ====================
+    Route::middleware('can:is-admin')->group(function () {
+
+        // ===== Wallet Admin Routes =====
+
+        Route::get('/wallet/admin/list', [WalletController::class, 'adminListWallets']);
+
+        // تعبئة مباشرة
+        Route::post('/wallet/admin-topup', [WalletController::class, 'adminTopUp']);
+        Route::post('/wallet/admin-topup/{userId}', [WalletController::class, 'adminTopUpUser']);
+
+        // طلبات تعبئة المحفظة
+        Route::get('/wallet/admin/topup-requests', [WalletController::class, 'adminListTopUpRequests']);
+        Route::post('/wallet/admin/approve-topup/{requestId}', [WalletController::class, 'adminApproveTopUp']);
+        Route::post('/wallet/admin/reject-topup/{requestId}', [WalletController::class, 'adminRejectTopUp']);
+
+        // سحب وإدارة
+        Route::post('/wallet/admin-withdraw', [WalletController::class, 'withdraw']);
+        Route::get('/wallet/admin/{userId}', [WalletController::class, 'adminShowWallet']);
+        // Route::get('/wallet/admin/list', [WalletController::class, 'adminListWallets']);
+
+        // ===== Reward Admin Routes =====
+        // تحويل مباشر
+        Route::post('/reward/admin-convert', [RewardController::class, 'adminConvertPoints']);
+
+        // طلبات تحويل النقاط
+        Route::get('/reward/admin/requests', [RewardController::class, 'adminListConversionRequests']);
+        Route::post('/reward/admin/approve/{requestId}', [RewardController::class, 'adminApproveConversion']);
+        Route::post('/reward/admin/reject/{requestId}', [RewardController::class, 'adminRejectConversion']);
+    });
 
     // Purchase Routes
     Route::post('/purchase/checkout', [PurchaseController::class, 'checkout']);
+    Route::post('/purchase/checkout/loyalty', [PurchaseController::class, 'checkoutWithLoyaltyPoints']);
     // ==================== Reward Routes ====================
     Route::get('/reward/balance', [RewardController::class, 'balance']);
     Route::get('/reward/history', [RewardController::class, 'history']);
     Route::post('/reward/redeem', [RewardController::class, 'redeem']);
+    Route::post('/reward/convert', [RewardController::class, 'convertPoints']); // تحويل نقاط الشراء إلى نقاط ولاء
     //////////////////////////////////////////////////
     Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
@@ -83,6 +126,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/cancel-email-change', [UserController::class, 'cancelEmailChange']);
     });
 
+
+
+
     Route::prefix('books')->middleware('verified')->group(function () {
         Route::get('/', [BooksController::class, 'list']);
         Route::get('/recommended', [BooksController::class, 'recommended']);
@@ -93,6 +139,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::middleware('can:is-admin')->group(function () {
             Route::post('/', [BooksController::class, 'add']);
             Route::put('/{bookId}', [BooksController::class, 'update']);
+
+
 
             ////
             //   Route::post('/category', [BooksController::class, 'storeCategory']);

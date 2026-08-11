@@ -31,6 +31,9 @@ class User extends Authenticatable implements CanResetPassword, MustVerifyEmail
         'bio',
         'pending_email',
         'total_points',
+        'purchase_points',
+        'event_points',
+        'loyalty_points'
     ];
 
     protected $hidden = [
@@ -44,6 +47,9 @@ class User extends Authenticatable implements CanResetPassword, MustVerifyEmail
             'birthdate' => 'date',
             'password' => 'hashed',
             'role' => UserRole::class,
+            'purchase_points' => 'integer',
+            'event_points' => 'integer',
+            'loyalty_points' => 'integer'
         ];
     }
 
