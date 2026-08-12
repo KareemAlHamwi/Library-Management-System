@@ -81,4 +81,9 @@ class BooksService
 
         return $book->load(['authors', 'categories']);
     }
+
+    public function delete(Book $book): void
+    {
+        $this->bookRepository->delete($book);
+    }
 }

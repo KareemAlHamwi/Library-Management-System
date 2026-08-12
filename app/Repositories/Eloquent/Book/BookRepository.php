@@ -78,4 +78,9 @@ class BookRepository implements BookRepositoryInterface
 
         return $book->fresh(['authors', 'categories']);
     }
+
+    public function delete(Book $book): void
+    {
+        $book->delete();
+    }
 }
