@@ -2,4 +2,5 @@
 
 return [
     'book_not_found' => 'This book is not found.',
+    'book_deleted' => 'Book deleted successfully.',
 ];

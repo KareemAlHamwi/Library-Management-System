@@ -78,28 +78,16 @@ class BooksController extends Controller
         ));
     }
 
+    public function delete(int $authorId): JsonResponse
+    {
+        $author = $this->booksService->get($authorId);
 
+        if (! $author) {
+            return response()->json(['message' => __('books.book_not_found')], 404);
+        }
 
+        $this->booksService->delete($author);
 
-
-
-
-
-    ////////////////////////////////////
-    // public function getBookCategories($bookId)
-    // {
-    //     $categories = Book::findOrfail($bookId)->categories;
-    //     return response()->json($categories, 200);
-    // }
-    // public function addCategoriesToBook(Request $request, $bookId)
-    // {
-    //     $book = Book::findOrfail($bookId);
-    //     $book->categories()->attach($request->category_id);
-    //     return response()->json('Category add successfuly', 200);
-    // }
-    // public function getCategoryTasks($categoryId)
-    // {
-    //     $books = Category::findOrfail($categoryId)->books;
-    //     return response()->json($books, 200);
-    // }
+        return response()->json(['message' => __('books.book_deleted')]);
+    }
 }
