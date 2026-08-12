@@ -64,7 +64,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
-     // Reward Routes (User)
+    // Reward Routes (User)
     Route::post('/reward/request-convert', [RewardController::class, 'requestConversion']);
     Route::get('/reward/my-requests', [RewardController::class, 'myConversionRequests']);
     Route::get('/reward/balance', [RewardController::class, 'balance']);
@@ -77,25 +77,30 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/wallet/admin/list', [WalletController::class, 'adminListWallets']);
 
-        // تعبئة مباشرة
+
         Route::post('/wallet/admin-topup', [WalletController::class, 'adminTopUp']);
         Route::post('/wallet/admin-topup/{userId}', [WalletController::class, 'adminTopUpUser']);
 
-        // طلبات تعبئة المحفظة
+
         Route::get('/wallet/admin/topup-requests', [WalletController::class, 'adminListTopUpRequests']);
         Route::post('/wallet/admin/approve-topup/{requestId}', [WalletController::class, 'adminApproveTopUp']);
         Route::post('/wallet/admin/reject-topup/{requestId}', [WalletController::class, 'adminRejectTopUp']);
 
-        // سحب وإدارة
+
         Route::post('/wallet/admin-withdraw', [WalletController::class, 'withdraw']);
         Route::get('/wallet/admin/{userId}', [WalletController::class, 'adminShowWallet']);
-        // Route::get('/wallet/admin/list', [WalletController::class, 'adminListWallets']);
 
+        // Route::get('/wallet/admin/list', [WalletController::class, 'adminListWallets']);
+        // ==================== Reward Routes ====================
+        Route::get('/reward/balance', [RewardController::class, 'balance']);
+        Route::get('/reward/history', [RewardController::class, 'history']);
+        Route::post('/reward/redeem', [RewardController::class, 'redeem']);
+        Route::post('/reward/convert', [RewardController::class, 'convertPoints']);
         // ===== Reward Admin Routes =====
-        // تحويل مباشر
+
         Route::post('/reward/admin-convert', [RewardController::class, 'adminConvertPoints']);
 
-        // طلبات تحويل النقاط
+
         Route::get('/reward/admin/requests', [RewardController::class, 'adminListConversionRequests']);
         Route::post('/reward/admin/approve/{requestId}', [RewardController::class, 'adminApproveConversion']);
         Route::post('/reward/admin/reject/{requestId}', [RewardController::class, 'adminRejectConversion']);
@@ -104,11 +109,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Purchase Routes
     Route::post('/purchase/checkout', [PurchaseController::class, 'checkout']);
     Route::post('/purchase/checkout/loyalty', [PurchaseController::class, 'checkoutWithLoyaltyPoints']);
-    // ==================== Reward Routes ====================
-    Route::get('/reward/balance', [RewardController::class, 'balance']);
-    Route::get('/reward/history', [RewardController::class, 'history']);
-    Route::post('/reward/redeem', [RewardController::class, 'redeem']);
-    Route::post('/reward/convert', [RewardController::class, 'convertPoints']); // تحويل نقاط الشراء إلى نقاط ولاء
+
     //////////////////////////////////////////////////
     Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
@@ -145,10 +146,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
-
+            ////
+            //   Route::post('/category', [BooksController::class, 'storeCategory']);
 
             Route::delete('/{authorId}', [BooksController::class, 'delete']);
-
         });
     });
 
