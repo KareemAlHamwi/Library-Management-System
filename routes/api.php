@@ -109,87 +109,82 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/admin/purchases', [PurchaseController::class, 'getAllPurchases']);
 
-
+       //////////// Admin purchases
         Route::get('/admin/users/{userId}/purchases', [PurchaseController::class, 'getUserPurchases']);
-
-
         Route::get('/admin/books/{bookId}/buyers', [PurchaseController::class, 'getBookBuyers']);
-
-
         Route::get('/admin/purchases/statistics', [PurchaseController::class, 'getPurchaseStatistics']);
-    // });
-});
-
-// Purchase Routes
-Route::post('/purchase/checkout', [PurchaseController::class, 'checkout']);
-Route::post('/purchase/checkout/loyalty', [PurchaseController::class, 'checkoutWithLoyaltyPoints']);
-Route::get('/purchase/all', [PurchaseController::class, 'getAllMypurchases']);
-//////////////////////////////////////////////////
-Route::prefix('auth')->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout']);
-
-    Route::post('/email/resend', [EmailVerificationNotificationController::class, 'store'])
-        ->middleware('throttle:6,1')
-        ->name('verification.send');
-});
-///////////////////////////////////
-
-
-Route::prefix('user')->middleware('verified')->group(function () {
-    Route::get('/me', [UserController::class, 'getCurrentUser']);
-    Route::get('/{id}', [UserController::class, 'show']);
-    Route::put('/', [UserController::class, 'update']);
-    Route::post('/avatar', [UserController::class, 'updateAvatar']);
-    Route::post('/cancel-email-change', [UserController::class, 'cancelEmailChange']);
-});
-
-
-
-
-Route::prefix('books')->middleware('verified')->group(function () {
-    Route::get('/', [BooksController::class, 'list']);
-    Route::get('/recommended', [BooksController::class, 'recommended']);
-    Route::get('/new-arrivals', [BooksController::class, 'newArrivals']);
-    Route::get('/popular', [BooksController::class, 'popular']);
-    Route::get('/{bookId}', [BooksController::class, 'get']);
-
-    Route::middleware('can:is-admin')->group(function () {
-        Route::post('/', [BooksController::class, 'add']);
-        Route::put('/{bookId}', [BooksController::class, 'update']);
-
-
-
-
-        ////
-        //   Route::post('/category', [BooksController::class, 'storeCategory']);
-
-        Route::delete('/{authorId}', [BooksController::class, 'delete']);
     });
-});
 
-Route::prefix('books/google')->middleware(['verified', 'can:is-admin'])->group(function () {
-    Route::get('/search', [GoogleBooksController::class, 'search']);
-    Route::get('/{volumeId}', [GoogleBooksController::class, 'getVolume']);
-});
+    // Purchase Routes
+    Route::post('/purchase/checkout', [PurchaseController::class, 'checkout']);
+    Route::post('/purchase/checkout/loyalty', [PurchaseController::class, 'checkoutWithLoyaltyPoints']);
+    Route::get('/purchase/all', [PurchaseController::class, 'getAllMypurchases']);
+    //////////////////////////////////////////////////
+    Route::prefix('auth')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
 
-Route::prefix('authors')->middleware('verified')->group(function () {
-    Route::get('/', [AuthorsController::class, 'list']);
-    Route::get('/{authorId}', [AuthorsController::class, 'get']);
-
-    Route::middleware('can:is-admin')->group(function () {
-        Route::post('/', [AuthorsController::class, 'add']);
-        Route::put('/{authorId}', [AuthorsController::class, 'update']);
-        Route::delete('/{authorId}', [AuthorsController::class, 'delete']);
+        Route::post('/email/resend', [EmailVerificationNotificationController::class, 'store'])
+            ->middleware('throttle:6,1')
+            ->name('verification.send');
     });
-});
+    ///////////////////////////////////
 
-Route::prefix('categories')->middleware('verified')->group(function () {
-    Route::get('/', [CategoryController::class, 'list']);
-    Route::get('/{categoryId}', [CategoryController::class, 'get']);
 
-    Route::middleware('can:is-admin')->group(function () {
-        Route::post('/', [CategoryController::class, 'add']);
-        Route::delete('/{categoryId}', [CategoryController::class, 'delete']);
+    Route::prefix('user')->middleware('verified')->group(function () {
+        Route::get('/me', [UserController::class, 'getCurrentUser']);
+        Route::get('/{id}', [UserController::class, 'show']);
+        Route::put('/', [UserController::class, 'update']);
+        Route::post('/avatar', [UserController::class, 'updateAvatar']);
+        Route::post('/cancel-email-change', [UserController::class, 'cancelEmailChange']);
     });
-});
+
+
+
+
+    Route::prefix('books')->middleware('verified')->group(function () {
+        Route::get('/', [BooksController::class, 'list']);
+        Route::get('/recommended', [BooksController::class, 'recommended']);
+        Route::get('/new-arrivals', [BooksController::class, 'newArrivals']);
+        Route::get('/popular', [BooksController::class, 'popular']);
+        Route::get('/{bookId}', [BooksController::class, 'get']);
+
+        Route::middleware('can:is-admin')->group(function () {
+            Route::post('/', [BooksController::class, 'add']);
+            Route::put('/{bookId}', [BooksController::class, 'update']);
+
+
+
+
+            ////
+            //   Route::post('/category', [BooksController::class, 'storeCategory']);
+
+            Route::delete('/{authorId}', [BooksController::class, 'delete']);
+        });
+    });
+
+    Route::prefix('books/google')->middleware(['verified', 'can:is-admin'])->group(function () {
+        Route::get('/search', [GoogleBooksController::class, 'search']);
+        Route::get('/{volumeId}', [GoogleBooksController::class, 'getVolume']);
+    });
+
+    Route::prefix('authors')->middleware('verified')->group(function () {
+        Route::get('/', [AuthorsController::class, 'list']);
+        Route::get('/{authorId}', [AuthorsController::class, 'get']);
+
+        Route::middleware('can:is-admin')->group(function () {
+            Route::post('/', [AuthorsController::class, 'add']);
+            Route::put('/{authorId}', [AuthorsController::class, 'update']);
+            Route::delete('/{authorId}', [AuthorsController::class, 'delete']);
+        });
+    });
+
+    Route::prefix('categories')->middleware('verified')->group(function () {
+        Route::get('/', [CategoryController::class, 'list']);
+        Route::get('/{categoryId}', [CategoryController::class, 'get']);
+
+        Route::middleware('can:is-admin')->group(function () {
+            Route::post('/', [CategoryController::class, 'add']);
+            Route::delete('/{categoryId}', [CategoryController::class, 'delete']);
+        });
+    });
 });
