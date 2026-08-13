@@ -13,10 +13,10 @@ class Purchase extends Model
         'amount_paid',
         'created_at'
     ];
-    // ✅ منع استخدام updated_at
+
     public $timestamps = false;
 
-    // ✅ تحديد created_at فقط
+
     const CREATED_AT = 'created_at';
     const UPDATED_AT = null;
 
