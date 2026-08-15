@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Services\Reward\RewardTransactionService;
 use App\Models\User;
 use App\Models\ConversionRequest;
+use App\Notifications\ConversionApprovedNotification;
+use App\Notifications\ConversionRejectedNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Notification;
 
 
 class RewardController extends Controller
@@ -115,7 +117,14 @@ class RewardController extends Controller
             }
 
             $this->rewardService->convertPurchasePointsToLoyalty($user, $points);
+            $conversionRequest = ConversionRequest::where('user_id', $user->id)
+                ->where('points_to_convert', $points)
 
+                ->first();
+
+            if ($conversionRequest) {
+                Notification::send($user, new ConversionApprovedNotification($conversionRequest));
+            }
             return response()->json([
                 'message' => 'Points successfully transferred by the admin.',
                 'user' => [
@@ -166,7 +175,8 @@ class RewardController extends Controller
             }
 
             $this->rewardService->approveConversion($conversionRequest);
-
+            $user = $conversionRequest->user;
+            Notification::send($user, new ConversionApprovedNotification($conversionRequest));
             return response()->json([
                 'message' => 'The transfer request has been successfully approved.',
                 'request' => $conversionRequest->fresh(),
@@ -195,7 +205,8 @@ class RewardController extends Controller
             $reason = $request->input('reason', 'The request was rejected by the admin.');
 
             $this->rewardService->rejectConversion($conversionRequest, $reason);
-
+            $user = $conversionRequest->user;
+            Notification::send($user, new ConversionRejectedNotification($conversionRequest, $reason));
             return response()->json([
                 'message' => 'The transfer request has been rejected.',
                 'request' => $conversionRequest->fresh(),

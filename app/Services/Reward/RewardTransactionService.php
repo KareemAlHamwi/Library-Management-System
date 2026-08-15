@@ -83,7 +83,7 @@ class RewardTransactionService
     {
 
         if ($user->purchase_points < $pointsToConvert) {
-            throw new \Exception('purchase points are not enough');
+            throw new \Exception(' Insufficient purchase points ');
         }
 
 
@@ -106,6 +106,47 @@ class RewardTransactionService
         return $request;
     }
 
+    public function convertPurchasePointsToLoyalty(User $user, int $pointsToConvert): void
+    {
+        if ($user->purchase_points < $pointsToConvert) {
+            throw new \Exception('Insufficient purchase points');
+        }
+
+        if ($pointsToConvert % self::CONVERSION_RATE !== 0) {
+            throw new \Exception('The points must be multiples of...' . self::CONVERSION_RATE);
+        }
+
+        $loyaltyPoints = ($pointsToConvert / self::CONVERSION_RATE) * self::LOYALTY_POINTS_PER_BOOK;
+        $now = Carbon::now();
+
+        DB::transaction(function () use ($user, $pointsToConvert, $loyaltyPoints, $now) {
+
+            $reward = RewardTransaction::create([
+                'user_id' => $user->id,
+                'points' => $pointsToConvert,
+                'type' => 'spent',
+                'reason' => 'convert purchase points to loyalty points',
+                'reference_id' => null,
+                'created_at' => $now
+            ]);
+
+
+            $user->decrement('purchase_points', $pointsToConvert);
+
+
+            $user->increment('loyalty_points', $loyaltyPoints);
+
+
+            RewardTransaction::create([
+                'user_id' => $user->id,
+                'points' => $loyaltyPoints,
+                'type' => 'earned',
+                'reason' => 'convert purchase points to loyalty points',
+                'reference_id' => $reward->id,
+                'created_at' => $now
+            ]);
+        });
+    }
 
     public function approveConversion(ConversionRequest $conversionRequest): void
     {
