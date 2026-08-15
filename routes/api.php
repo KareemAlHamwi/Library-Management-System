@@ -128,13 +128,16 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     ///////////////////////////////////
     //Notifications
-
+    Route::get('/notifications/type/{type}', [NotificationController::class, 'getByType']);
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::get('/notifications/unread', [NotificationController::class, 'unread']);
     Route::post('/notifications/{notificationId}/read', [NotificationController::class, 'markAsRead']);
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
     Route::delete('/notifications/{notificationId}', [NotificationController::class, 'delete']);
     Route::delete('/notifications/read/delete', [NotificationController::class, 'deleteRead']);
+    Route::delete('/notifications/unread/delete', [NotificationController::class, 'deleteUnread']);
+    Route::delete('/notifications/type', [NotificationController::class, 'deleteByType']);
+    Route::delete('/notifications/all', [NotificationController::class, 'deleteAll']);
 
     Route::prefix('user')->middleware('verified')->group(function () {
         Route::get('/me', [UserController::class, 'getCurrentUser']);

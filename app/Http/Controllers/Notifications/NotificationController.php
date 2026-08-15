@@ -181,4 +181,95 @@ class NotificationController extends Controller
             'deleted_count' => $deletedCount,
         ]);
     }
+
+
+    /**
+     * ✅ عرض الإشعارات حسب النوع
+     */
+    public function getByType(string $type): JsonResponse
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'You must loggin first'
+            ], 401);
+        }
+
+        $notifications = $user->notifications()
+            ->whereRaw('JSON_EXTRACT(data, "$.type") = ?', [$type])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'notifications' => $notifications,
+            'count' => $notifications->count(),
+            'type' => $type,
+        ]);
+    }
+
+    public function deleteByType(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'You must loggin first'
+            ], 401);
+        }
+
+        $request->validate([
+            'type' => 'required|string|in:topup_completed,topup_rejected,conversion_approved,conversion_rejected,new_book_added,book_updated,book_deleted'
+        ]);
+
+        $type = $request->input('type');
+
+        $deletedCount = $user->notifications()
+            ->whereRaw('JSON_EXTRACT(data, "$.type") = ?', [$type])
+            ->delete();
+
+        return response()->json([
+            'message' => 'All Notification with type are deleted: ' . $type,
+            'deleted_count' => $deletedCount,
+            'type' => $type,
+        ]);
+    }
+
+    public function deleteUnread(): JsonResponse
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'You nust login first'
+            ], 401);
+        }
+
+        $deletedCount = $user->notifications()
+            ->whereNull('read_at')
+            ->delete();
+
+        return response()->json([
+            'message' => 'All unreader notifications are deleted',
+            'deleted_count' => $deletedCount,
+        ]);
+    }
+
+    public function deleteAll(): JsonResponse
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'You must loggin first '
+            ], 401);
+        }
+
+        $deletedCount = $user->notifications()->delete();
+
+        return response()->json([
+            'message' => "All notifications are deleted",
+            'deleted_count' => $deletedCount,
+        ]);
+    }
 }
