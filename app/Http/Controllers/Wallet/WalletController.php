@@ -9,9 +9,12 @@ use App\Services\Wallet\WalletService;
 use App\Http\Requests\Wallet\TopUpRequest;
 use App\Models\User;
 use App\Models\TopUpRequest as TopUpRequestModel;
+use App\Notifications\TopUpRejectedNotification;
+use App\Notifications\TopUpWalletNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 
 class WalletController extends Controller
 {
@@ -162,7 +165,7 @@ class WalletController extends Controller
                 'admin_topup',
                 Auth::id()
             );
-
+            Notification::send($user, new TopUpWalletNotification($transaction));
             return response()->json([
                 'message' => 'The wallet has been successfully topped up by the admin.',
                 'user' => [
@@ -203,7 +206,7 @@ class WalletController extends Controller
                 'admin_topup',
                 Auth::id()
             );
-
+            Notification::send($user, new TopUpWalletNotification($transaction));
             return response()->json([
                 'message' => 'The wallet has been successfully topped up by the admin.',
                 'user' => [
@@ -228,6 +231,8 @@ class WalletController extends Controller
     public function adminApproveTopUp(int $requestId): JsonResponse
     {
         try {
+
+
             $topUpRequest = TopUpRequestModel::findOrFail($requestId);
 
             if ($topUpRequest->status !== 'pending') {
@@ -238,7 +243,8 @@ class WalletController extends Controller
             }
 
             $transaction = $this->walletService->approveTopUp($topUpRequest);
-
+            $user = $topUpRequest->user;
+            Notification::send($user, new TopUpWalletNotification($transaction));
             return response()->json([
                 'message' => 'The wallet top-up request has been successfully approved.',
                 'request' => $topUpRequest->fresh(),
@@ -265,10 +271,11 @@ class WalletController extends Controller
                 ], 400);
             }
 
-            $reason = $request->input('reason', 'The request was rejected by the admin.');
+            $reason = $request->input('reason', 'you cannot now');
 
             $this->walletService->rejectTopUp($topUpRequest, $reason);
-
+            $user = $topUpRequest->user;
+            Notification::send($user, new TopUpRejectedNotification($topUpRequest, $reason));
             return response()->json([
                 'message' => 'The wallet top-up request was rejected.',
                 'request' => $topUpRequest->fresh(),

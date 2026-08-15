@@ -9,11 +9,14 @@ use App\Http\Requests\Book\UpdateBookRequest;
 use App\Http\Resources\Book\BookListResource;
 use App\Http\Resources\Book\BookResource;
 use App\Models\Book;
+use App\Models\User;
 use App\Models\Category;
+use App\Notifications\BookNotification;
 use App\Services\Book\BooksService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Notification;
 
 class BooksController extends Controller
 {
@@ -61,7 +64,8 @@ class BooksController extends Controller
     public function add(AddBookRequest $request): JsonResponse
     {
         $book = $this->booksService->add($request->validated());
-
+        $users=User::all();
+        Notification::send($users,new BookNotification($book));
         return response()->json(new BookResource($book), 201);
     }
 
