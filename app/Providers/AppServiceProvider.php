@@ -8,11 +8,13 @@ use App\Repositories\Contracts\Author\AuthorRepositoryInterface;
 use App\Repositories\Contracts\Book\BookRepositoryInterface;
 use App\Repositories\Contracts\Category\CategoryRepositoryInterface;
 use App\Repositories\Contracts\Favorite\FavoriteRepositoryInterface;
+use App\Repositories\Contracts\Review\ReviewRepositoryInterface;
 use App\Repositories\Contracts\User\UserRepositoryInterface;
 use App\Repositories\Eloquent\Author\AuthorRepository;
 use App\Repositories\Eloquent\Book\BookRepository;
 use App\Repositories\Eloquent\Category\CategoryRepository;
 use App\Repositories\Eloquent\Favorite\FavoriteRepository;
+use App\Repositories\Eloquent\Review\ReviewRepository;
 use App\Repositories\Eloquent\User\UserRepository;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Gate;
@@ -46,6 +48,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             FavoriteRepositoryInterface::class,
             FavoriteRepository::class,
+        );
+        $this->app->bind(
+            ReviewRepositoryInterface::class,
+            ReviewRepository::class,
         );
     }
 

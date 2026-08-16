@@ -13,6 +13,7 @@ use App\Http\Controllers\Category\CategoryController;
 use App\Http\Controllers\Favorite\FavoritesController;
 use App\Http\Controllers\Notifications\NotificationController;
 use App\Http\Controllers\Purchase\PurchaseController;
+use App\Http\Controllers\Review\ReviewController;
 use App\Http\Controllers\Reward\RewardController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Wallet\WalletController;
@@ -189,5 +190,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [FavoritesController::class, 'index']);
         Route::get('/{book}', [FavoritesController::class, 'check']);
         Route::post('/{book}/toggle', [FavoritesController::class, 'toggle']);
+    });
+
+    Route::get('/books/{book}/reviews', [ReviewController::class, 'index']);
+    Route::post('/books/{book}/reviews', [ReviewController::class, 'store']);
+    Route::get('/my-reviews', [ReviewController::class, 'myReviews']);
+    Route::put('/reviews/{review}', [ReviewController::class, 'update']);
+    Route::delete('/reviews/{review}', [ReviewController::class, 'destroy']);
+
+    Route::middleware('can:is-admin')->group(function () {
+        Route::get('/admin/reviews', [ReviewController::class, 'adminIndex']);
+        Route::post('/admin/reviews/{review}/approve', [ReviewController::class, 'approve']);
+        Route::delete('/admin/reviews/{review}', [ReviewController::class, 'adminDestroy']);
     });
 });
