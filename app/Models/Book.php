@@ -59,4 +59,9 @@ class Book extends Model
     {
         return $this->hasMany(Event::class);
     }
+
+    public function favorites(): HasMany
+    {
+        return $this->hasMany(Favorite::class);
+    }
 }

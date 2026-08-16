@@ -8,14 +8,16 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Author\AuthorsController;
 use App\Http\Controllers\Book\BooksController;
 use App\Http\Controllers\Book\GoogleBooksController;
-use App\Http\Controllers\Category\CategoryController;
-use App\Http\Controllers\User\UserController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Cart\CartController;
+use App\Http\Controllers\Category\CategoryController;
+use App\Http\Controllers\Favorite\FavoritesController;
 use App\Http\Controllers\Notifications\NotificationController;
 use App\Http\Controllers\Purchase\PurchaseController;
-use App\Http\Controllers\Wallet\WalletController;
 use App\Http\Controllers\Reward\RewardController;
+use App\Http\Controllers\User\UserController;
+use App\Http\Controllers\Wallet\WalletController;
+use Illuminate\Support\Facades\Route;
+
 /*
 |--------------------------------------------------------------------------
 | Public Routes
@@ -44,7 +46,7 @@ Route::prefix('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth:sanctum')->group(function () {
-    /////////////////////////Cart
+    // ///////////////////////Cart
     Route::prefix('cart')->group(function () {
         Route::get('/', [CartController::class, 'index']);
         Route::post('/add', [CartController::class, 'add']);
@@ -52,7 +54,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{book}', [CartController::class, 'remove']);
         Route::delete('/', [CartController::class, 'clear']);
     });
-    ////////////////////////////////////////////////
+    // //////////////////////////////////////////////
 
     // Wallet Routes
     Route::get('/wallet', [WalletController::class, 'index']);
@@ -62,8 +64,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/wallet/deposit', [WalletController::class, 'deposit']);
     Route::post('/wallet/request-topup', [WalletController::class, 'requestTopUp']);
     Route::get('/wallet/my-topup-requests', [WalletController::class, 'myTopUpRequests']);
-
-
 
     // Reward Routes (User)
     Route::post('/reward/request-convert', [RewardController::class, 'requestConversion']);
@@ -82,31 +82,25 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/wallet/admin/list', [WalletController::class, 'adminListWallets']);
 
-
         Route::post('/wallet/admin-topup', [WalletController::class, 'adminTopUp']);
         Route::post('/wallet/admin-topup/{userId}', [WalletController::class, 'adminTopUpUser']);
-
 
         Route::get('/wallet/admin/topup-requests', [WalletController::class, 'adminListTopUpRequests']);
         Route::post('/wallet/admin/approve-topup/{requestId}', [WalletController::class, 'adminApproveTopUp']);
         Route::post('/wallet/admin/reject-topup/{requestId}', [WalletController::class, 'adminRejectTopUp']);
 
-
         Route::post('/wallet/admin-withdraw', [WalletController::class, 'withdraw']);
         Route::get('/wallet/admin/{userId}', [WalletController::class, 'adminShowWallet']);
-
-
 
         // ===== Reward Admin Routes =====
 
         Route::post('/reward/admin-convert', [RewardController::class, 'adminConvertPoints']);
 
-
         Route::get('/reward/admin/requests', [RewardController::class, 'adminListConversionRequests']);
         Route::post('/reward/admin/approve/{requestId}', [RewardController::class, 'adminApproveConversion']);
         Route::post('/reward/admin/reject/{requestId}', [RewardController::class, 'adminRejectConversion']);
         Route::post('/reward/convert', [RewardController::class, 'adminConvertPoints']);
-        //Admin Purchases
+        // Admin Purchases
         Route::get('/admin/purchases', [PurchaseController::class, 'getAllPurchases']);
         Route::get('/admin/users/{userId}/purchases', [PurchaseController::class, 'getUserPurchases']);
         Route::get('/admin/books/{bookId}/buyers', [PurchaseController::class, 'getBookBuyers']);
@@ -118,7 +112,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/purchase/checkout', [PurchaseController::class, 'checkout']);
     Route::post('/purchase/checkout/loyalty', [PurchaseController::class, 'checkoutWithLoyaltyPoints']);
     Route::get('/purchase/all', [PurchaseController::class, 'getAllMypurchases']);
-    //////////////////////////////////////////////////
+    // ////////////////////////////////////////////////
     Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
 
@@ -126,8 +120,8 @@ Route::middleware('auth:sanctum')->group(function () {
             ->middleware('throttle:6,1')
             ->name('verification.send');
     });
-    ///////////////////////////////////
-    //Notifications
+    // /////////////////////////////////
+    // Notifications
     Route::get('/notifications/type/{type}', [NotificationController::class, 'getByType']);
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::get('/notifications/unread', [NotificationController::class, 'unread']);
@@ -147,9 +141,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/cancel-email-change', [UserController::class, 'cancelEmailChange']);
     });
 
-
-
-
     Route::prefix('books')->middleware('verified')->group(function () {
         Route::get('/', [BooksController::class, 'list']);
         Route::get('/recommended', [BooksController::class, 'recommended']);
@@ -161,10 +152,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/', [BooksController::class, 'add']);
             Route::put('/{bookId}', [BooksController::class, 'update']);
 
-
-
-
-            ////
+            // //
             //   Route::post('/category', [BooksController::class, 'storeCategory']);
 
             Route::delete('/{authorId}', [BooksController::class, 'delete']);
@@ -195,5 +183,11 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/', [CategoryController::class, 'add']);
             Route::delete('/{categoryId}', [CategoryController::class, 'delete']);
         });
+    });
+
+    Route::prefix('favorites')->middleware('verified')->group(function () {
+        Route::get('/', [FavoritesController::class, 'index']);
+        Route::get('/{book}', [FavoritesController::class, 'check']);
+        Route::post('/{book}/toggle', [FavoritesController::class, 'toggle']);
     });
 });
