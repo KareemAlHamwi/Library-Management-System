@@ -43,6 +43,8 @@ Route::prefix('auth')->group(function () {
         ->name('verification.verify');
 });
 
+Route::get('/books', [BooksController::class, 'list']);
+
 /*
 |--------------------------------------------------------------------------
 | Protected Routes (Sanctum)
@@ -145,7 +147,6 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::prefix('books')->middleware('verified')->group(function () {
-        Route::get('/', [BooksController::class, 'list']);
         Route::get('/recommended', [BooksController::class, 'recommended']);
         Route::get('/new-arrivals', [BooksController::class, 'newArrivals']);
         Route::get('/popular', [BooksController::class, 'popular']);
