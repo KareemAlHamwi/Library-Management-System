@@ -2,12 +2,31 @@
 
 namespace App\Models;
 
+use App\Enums\EventStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Event extends Model
 {
+    protected $fillable = [
+        'supervisor_id',
+        'book_id',
+        'title',
+        'description',
+        'prompt',
+        'external_link',
+        'status',
+        'starts_at',
+        'ends_at',
+    ];
+
+    protected $casts = [
+        'status' => EventStatus::class,
+        'starts_at' => 'datetime',
+        'ends_at' => 'datetime',
+    ];
+
     public function supervisor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'supervisor_id');

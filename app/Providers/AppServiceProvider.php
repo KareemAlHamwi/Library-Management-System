@@ -7,12 +7,16 @@ use App\Models\User;
 use App\Repositories\Contracts\Author\AuthorRepositoryInterface;
 use App\Repositories\Contracts\Book\BookRepositoryInterface;
 use App\Repositories\Contracts\Category\CategoryRepositoryInterface;
+use App\Repositories\Contracts\Event\EventRepositoryInterface;
+use App\Repositories\Contracts\Event\SubmissionRepositoryInterface;
 use App\Repositories\Contracts\Favorite\FavoriteRepositoryInterface;
 use App\Repositories\Contracts\Review\ReviewRepositoryInterface;
 use App\Repositories\Contracts\User\UserRepositoryInterface;
 use App\Repositories\Eloquent\Author\AuthorRepository;
 use App\Repositories\Eloquent\Book\BookRepository;
 use App\Repositories\Eloquent\Category\CategoryRepository;
+use App\Repositories\Eloquent\Event\EventRepository;
+use App\Repositories\Eloquent\Event\SubmissionRepository;
 use App\Repositories\Eloquent\Favorite\FavoriteRepository;
 use App\Repositories\Eloquent\Review\ReviewRepository;
 use App\Repositories\Eloquent\User\UserRepository;
@@ -52,6 +56,14 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             ReviewRepositoryInterface::class,
             ReviewRepository::class,
+        );
+        $this->app->bind(
+            EventRepositoryInterface::class,
+            EventRepository::class
+        );
+        $this->app->bind(
+            SubmissionRepositoryInterface::class,
+            SubmissionRepository::class
         );
     }
 

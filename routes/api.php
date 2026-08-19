@@ -10,6 +10,8 @@ use App\Http\Controllers\Book\BooksController;
 use App\Http\Controllers\Book\GoogleBooksController;
 use App\Http\Controllers\Cart\CartController;
 use App\Http\Controllers\Category\CategoryController;
+use App\Http\Controllers\Event\EventController;
+use App\Http\Controllers\Event\SubmissionController;
 use App\Http\Controllers\Favorite\FavoritesController;
 use App\Http\Controllers\Notifications\NotificationController;
 use App\Http\Controllers\Purchase\PurchaseController;
@@ -202,5 +204,38 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/reviews', [ReviewController::class, 'adminIndex']);
         Route::post('/admin/reviews/{review}/approve', [ReviewController::class, 'approve']);
         Route::delete('/admin/reviews/{review}', [ReviewController::class, 'adminDestroy']);
+    });
+
+    Route::get('/events', [EventController::class, 'index']);
+    Route::get('/events/{event}', [EventController::class, 'show']);
+    Route::get('/my-events', [EventController::class, 'myEvents']);
+    Route::post('/events/{event}/join', [EventController::class, 'join']);
+    Route::delete('/events/{event}/leave', [EventController::class, 'leave']);
+
+    Route::post('/events/{event}/submissions', [SubmissionController::class, 'store']);
+    Route::get('/my-submissions', [SubmissionController::class, 'mySubmissions']);
+
+    Route::middleware('can:is-admin')->prefix('admin')->group(function () {
+        Route::get('/events', [EventController::class, 'adminIndex']);
+        Route::post('/events', [EventController::class, 'store']);
+        Route::put('/events/{event}', [EventController::class, 'update']);
+        Route::delete('/events/{event}', [EventController::class, 'destroy']);
+        Route::patch('/events/{event}/status', [EventController::class, 'changeStatus']);
+
+        Route::get('/events/{event}/submissions', [SubmissionController::class, 'eventSubmissions']);
+        Route::post('/submissions/{submission}/approve', [SubmissionController::class, 'approve']);
+        Route::post('/submissions/{submission}/reject', [SubmissionController::class, 'reject']);
+    });
+
+    Route::middleware('can:is-supervisor')->prefix('supervisor')->group(function () {
+        Route::get('/events', [EventController::class, 'supervisorIndex']);
+        Route::post('/events', [EventController::class, 'supervisorStore']);
+        Route::put('/events/{event}', [EventController::class, 'supervisorUpdate']);
+        Route::delete('/events/{event}', [EventController::class, 'supervisorDestroy']);
+        Route::patch('/events/{event}/status', [EventController::class, 'supervisorChangeStatus']);
+
+        Route::get('/events/{event}/submissions', [SubmissionController::class, 'supervisorEventSubmissions']);
+        Route::post('/submissions/{submission}/approve', [SubmissionController::class, 'supervisorApprove']);
+        Route::post('/submissions/{submission}/reject', [SubmissionController::class, 'supervisorReject']);
     });
 });
