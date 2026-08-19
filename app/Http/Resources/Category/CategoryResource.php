@@ -12,15 +12,13 @@ class CategoryResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'image' => $this->image ? asset('storage/'.$this->image) : null,
             'books_count' => $this->whenCounted('books'),
             'books' => $this->whenLoaded('books', fn () => $this->books->map(fn ($b) => [
                 'id' => $b->id,
                 'title' => $b->title,
-                'cover_image' => $b->cover_image
-                                    ? asset('storage/'.$b->cover_image)
-                                    : null,
-            ])
-            ),
+                'cover_image' => $b->cover_image ? asset('storage/'.$b->cover_image) : null,
+            ])),
             'created_at' => $this->created_at->toDateString(),
         ];
     }

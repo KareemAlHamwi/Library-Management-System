@@ -12,6 +12,7 @@ class CategoryListResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'image' => $this->image ? asset('storage/'.$this->image) : null,
             'books_count' => $this->whenCounted('books'),
         ];
     }

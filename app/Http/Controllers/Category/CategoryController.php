@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Category;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Category\AddCategoryRequest;
+use App\Http\Requests\Category\UpdateCategoryRequest;
 use App\Http\Resources\Category\CategoryListResource;
 use App\Http\Resources\Category\CategoryResource;
 use App\Services\Category\CategoryService;
@@ -13,7 +14,9 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class CategoryController extends Controller
 {
-    public function __construct(private readonly CategoryService $categoryService) {}
+    public function __construct(
+        private readonly CategoryService $categoryService
+    ) {}
 
     public function list(Request $request): AnonymousResourceCollection
     {
@@ -22,15 +25,15 @@ class CategoryController extends Controller
         );
     }
 
-    public function get(int $catCategoryId): JsonResponse
+    public function get(int $categoryId): JsonResponse
     {
-        $catCategory = $this->categoryService->get($catCategoryId);
+        $category = $this->categoryService->get($categoryId);
 
-        if (! $catCategory) {
-            return response()->json(['message' => __('catCategory.catCategory_not_found')], 404);
+        if (! $category) {
+            return response()->json(['message' => __('category.not_found')], 404);
         }
 
-        return response()->json(new CategoryResource($catCategory));
+        return response()->json(new CategoryResource($category));
     }
 
     public function add(AddCategoryRequest $request): JsonResponse
@@ -41,16 +44,29 @@ class CategoryController extends Controller
         );
     }
 
-    public function delete(int $catCategoryId): JsonResponse
+    public function update(UpdateCategoryRequest $request, int $categoryId): JsonResponse
     {
-        $catCategory = $this->categoryService->get($catCategoryId);
+        $category = $this->categoryService->get($categoryId);
 
-        if (! $catCategory) {
-            return response()->json(['message' => __('catCategory.catCategory_not_found')], 404);
+        if (! $category) {
+            return response()->json(['message' => __('category.not_found')], 404);
         }
 
-        $this->categoryService->delete($catCategory);
+        return response()->json(
+            new CategoryResource($this->categoryService->update($category, $request->validated()))
+        );
+    }
 
-        return response()->json(['message' => __('catCategory.catCategory_deleted')]);
+    public function delete(int $categoryId): JsonResponse
+    {
+        $category = $this->categoryService->get($categoryId);
+
+        if (! $category) {
+            return response()->json(['message' => __('category.not_found')], 404);
+        }
+
+        $this->categoryService->delete($category);
+
+        return response()->json(['message' => __('category.deleted')]);
     }
 }

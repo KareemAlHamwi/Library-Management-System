@@ -185,6 +185,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::middleware('can:is-admin')->group(function () {
             Route::post('/', [CategoryController::class, 'add']);
+            Route::post('/{categoryId}', [CategoryController::class, 'update']);
             Route::delete('/{categoryId}', [CategoryController::class, 'delete']);
         });
     });
