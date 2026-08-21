@@ -8,10 +8,14 @@ use App\Http\Requests\Event\CreateEventRequest;
 use App\Http\Requests\Event\UpdateEventRequest;
 use App\Http\Resources\Event\EventResource;
 use App\Models\Event;
+use App\Models\User;
+use App\Notifications\EventNotification;
 use App\Services\Event\EventService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+// use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Notification;
 
 class EventController extends Controller
 {
@@ -80,6 +84,10 @@ class EventController extends Controller
     public function store(CreateEventRequest $request): JsonResponse
     {
         $event = $this->eventService->create($request->user(), $request->validated());
+
+        $users = User::all();
+
+        Notification::send($users, new EventNotification($event));
 
         return response()->json(new EventResource($event->load(['book', 'supervisor'])), 201);
     }
