@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Models\User;
 use App\Repositories\Contracts\Author\AuthorRepositoryInterface;
 use App\Repositories\Contracts\Book\BookRepositoryInterface;
+use App\Repositories\Contracts\Borrow\BorrowRepositoryInterface;
 use App\Repositories\Contracts\Category\CategoryRepositoryInterface;
 use App\Repositories\Contracts\Event\EventRepositoryInterface;
 use App\Repositories\Contracts\Event\SubmissionRepositoryInterface;
@@ -14,6 +15,7 @@ use App\Repositories\Contracts\Review\ReviewRepositoryInterface;
 use App\Repositories\Contracts\User\UserRepositoryInterface;
 use App\Repositories\Eloquent\Author\AuthorRepository;
 use App\Repositories\Eloquent\Book\BookRepository;
+use App\Repositories\Eloquent\Borrow\BorrowRepository;
 use App\Repositories\Eloquent\Category\CategoryRepository;
 use App\Repositories\Eloquent\Event\EventRepository;
 use App\Repositories\Eloquent\Event\SubmissionRepository;
@@ -64,6 +66,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             SubmissionRepositoryInterface::class,
             SubmissionRepository::class
+        );
+        $this->app->bind(
+            BorrowRepositoryInterface::class,
+            BorrowRepository::class
         );
     }
 
