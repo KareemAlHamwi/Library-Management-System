@@ -50,12 +50,18 @@ class BorrowService
             throw new \Exception('You already have an active or pending borrow for this book.', 409);
         }
 
-        return $this->borrowRepository->create([
-            'user_id' => $user->id,
-            'book_id' => $book->id,
-            'due_date' => $dueDate,
-            'status' => BorrowStatus::PENDING,
-        ]);
+        $borrow = DB::transaction(function () use ($user, $book, $dueDate) {
+            return $this->borrowRepository->create([
+                'user_id' => $user->id,
+                'book_id' => $book->id,
+                'due_date' => $dueDate,
+                'status' => BorrowStatus::PENDING,
+            ]);
+        }, 3);
+
+        $borrow->loadMissing(['user', 'book']);
+
+        return $borrow;
     }
 
     public function approve(Borrow $borrow): Borrow
@@ -64,11 +70,15 @@ class BorrowService
             throw new \Exception('Only pending borrows can be approved.', 422);
         }
 
-        return DB::transaction(function () use ($borrow) {
+        $borrow = DB::transaction(function () use ($borrow) {
             $borrow->book->decrement('available_copies');
 
             return $this->borrowRepository->updateStatus($borrow, BorrowStatus::ACTIVE);
-        });
+        }, 3);
+
+        $borrow->loadMissing(['user', 'book', 'fine']);
+
+        return $borrow;
     }
 
     public function reject(Borrow $borrow): Borrow
@@ -77,7 +87,11 @@ class BorrowService
             throw new \Exception('Only pending borrows can be rejected.', 422);
         }
 
-        return $this->borrowRepository->updateStatus($borrow, BorrowStatus::REJECTED);
+        $borrow = $this->borrowRepository->updateStatus($borrow, BorrowStatus::REJECTED);
+
+        $borrow->loadMissing(['user', 'book']);
+
+        return $borrow;
     }
 
     public function markReturned(Borrow $borrow): Borrow
@@ -86,7 +100,7 @@ class BorrowService
             throw new \Exception('Only active or overdue borrows can be returned.', 422);
         }
 
-        return DB::transaction(function () use ($borrow) {
+        $borrow = DB::transaction(function () use ($borrow) {
             $borrow->book->increment('available_copies');
 
             return $this->borrowRepository->updateStatus(
@@ -94,7 +108,11 @@ class BorrowService
                 BorrowStatus::RETURNED,
                 ['returned_at' => now()]
             );
-        });
+        }, 3);
+
+        $borrow->loadMissing(['user', 'book', 'fine']);
+
+        return $borrow;
     }
 
     public function markOverdue(Borrow $borrow): Borrow
@@ -107,14 +125,18 @@ class BorrowService
             throw new \Exception('Due date has not passed yet.', 422);
         }
 
-        return DB::transaction(function () use ($borrow) {
+        $borrow = DB::transaction(function () use ($borrow) {
             $updated = $this->borrowRepository->updateStatus($borrow, BorrowStatus::OVERDUE);
             $daysOverdue = now()->diffInDays($borrow->due_date);
             $amount = max(1, $daysOverdue) * self::FINE_RATE_PER_DAY;
             $this->borrowRepository->createFine($updated, $amount);
 
             return $updated;
-        });
+        }, 3);
+
+        $borrow->loadMissing(['user', 'book', 'fine']);
+
+        return $borrow;
     }
 
     public function payFine(User $user, Fine $fine): Fine
@@ -122,6 +144,8 @@ class BorrowService
         if ($fine->isPaid()) {
             throw new \Exception('This fine has already been paid.', 409);
         }
+
+        $fine->loadMissing('borrow');
 
         if ($fine->borrow->user_id !== $user->id) {
             throw new \Exception('You are not authorized to pay this fine.', 403);
@@ -133,10 +157,14 @@ class BorrowService
             throw new \Exception('Insufficient wallet balance.', 422);
         }
 
-        return DB::transaction(function () use ($wallet, $fine) {
+        $fine = DB::transaction(function () use ($wallet, $fine) {
             $wallet->decrement('balance', $fine->amount);
 
             return $this->borrowRepository->markFinePaid($fine);
-        });
+        }, 3);
+
+        $fine->loadMissing(['borrow.book']);
+
+        return $fine;
     }
 }
