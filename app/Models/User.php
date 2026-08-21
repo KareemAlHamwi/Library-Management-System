@@ -33,7 +33,8 @@ class User extends Authenticatable implements CanResetPassword, MustVerifyEmail
         'total_points',
         'purchase_points',
         'event_points',
-        'loyalty_points'
+        'loyalty_points',
+        'role'
     ];
 
     protected $hidden = [

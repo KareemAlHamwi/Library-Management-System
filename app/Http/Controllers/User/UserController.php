@@ -7,9 +7,12 @@ use App\Http\Requests\User\AvatarRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Resources\Auth\UserResource;
 use App\Http\Resources\User\PublicProfileResource;
+use App\Models\User;
 use App\Services\User\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
@@ -73,6 +76,57 @@ class UserController extends Controller
         $this->userService->deleteUser($user);
         return response()->json([
             'message' => __('user.deleted_successfully'),
+        ]);
+    }
+
+
+    public function changeRole(Request $request, int $userId): JsonResponse
+    {
+
+
+        $validator = Validator::make($request->all(), [
+            'role' => 'required|string|in:member,supervisor,admin'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Incorrect Data',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $user = User::findOrFail($userId);
+        $newRole = $request->input('role');
+
+
+        if ($user->id === Auth::id() && $newRole !== 'admin') {
+            return response()->json([
+                'message' => 'You cannot change your own role to...' . $newRole
+            ], 403);
+        }
+
+
+        if ($user->role === 'admin' && Auth::id() !== $user->id) {
+            return response()->json([
+                'message' => 'You cannot change your own role to...'
+            ], 403);
+        }
+
+        $oldRole = $user->role;
+
+
+        $user->update(['role' => $newRole]);
+
+        return response()->json([
+            'message' => 'The user role has been successfully changed.',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->first_name . ' ' . $user->last_name,
+                'email' => $user->email,
+                'old_role' => $oldRole,
+                'new_role' => $user->role,
+            ],
+            'admin' => Auth::user()->email,
         ]);
     }
 }
