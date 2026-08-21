@@ -40,8 +40,12 @@ class UserService
         }
 
         return $this->userRepository->update($user, collect($data)->only([
-            'first_name', 'last_name', 'phone_number',
-            'address', 'birthdate', 'bio',
+            'first_name',
+            'last_name',
+            'phone_number',
+            'address',
+            'birthdate',
+            'bio',
         ])->toArray());
     }
 
@@ -85,5 +89,15 @@ class UserService
     public function verifyEmail(User $user): void
     {
         $this->userRepository->verifyEmail($user, $user->pending_email);
+    }
+
+    public function deleteUser(User $user): bool
+    {
+
+        if ($user->avatar) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+        $user->tokens()->delete();
+        return $this->userRepository->delete($user);
     }
 }

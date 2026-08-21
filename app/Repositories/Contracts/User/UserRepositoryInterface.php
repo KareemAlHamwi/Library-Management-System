@@ -13,4 +13,5 @@ interface UserRepositoryInterface
     public function update(User $user, array $data): User;
 
     public function verifyEmail(User $user, ?string $pendingEmail): void;
+    public function delete(User $user): bool;
 }

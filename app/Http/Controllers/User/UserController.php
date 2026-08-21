@@ -67,4 +67,12 @@ class UserController extends Controller
     {
         return response()->json(new UserResource(auth()->user()));
     }
+    public function destroy(int $id): JsonResponse
+    {
+        $user = $this->userService->findById($id);
+        $this->userService->deleteUser($user);
+        return response()->json([
+            'message' => __('user.deleted_successfully'),
+        ]);
+    }
 }

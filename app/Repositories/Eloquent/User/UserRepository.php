@@ -37,4 +37,8 @@ class UserRepository implements UserRepositoryInterface
         $user->markEmailAsVerified();
         $user->save();
     }
+    public function delete(User $user): bool
+    {
+        return $user->delete();
+    }
 }

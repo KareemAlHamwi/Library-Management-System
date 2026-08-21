@@ -140,7 +140,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('user')->middleware('verified')->group(function () {
         Route::get('/me', [UserController::class, 'getCurrentUser']);
-        Route::get('/{id}', [UserController::class, 'show']);
+        Route::get('/{id}', [UserController::class, 'show'])->middleware('can:is-admin');
+        Route::delete('/delete/{id}', [UserController::class, 'destroy'])->middleware('can:is-admin');
         Route::put('/', [UserController::class, 'update']);
         Route::post('/avatar', [UserController::class, 'updateAvatar']);
         Route::post('/cancel-email-change', [UserController::class, 'cancelEmailChange']);
