@@ -253,13 +253,13 @@ class RewardTransactionService
 
     public function getPurchasePointsBalance(User $user): int
     {
-        return $user->purchase_points;
+        return (int) $user->purchase_points;
     }
 
 
     public function getLoyaltyPointsBalance(User $user): int
     {
-        return $user->loyalty_points;
+        return (int) $user->loyalty_points;
     }
 
 
