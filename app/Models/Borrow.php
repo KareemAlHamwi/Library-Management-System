@@ -9,8 +9,18 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Borrow extends Model
 {
+    protected $fillable = [
+        'user_id',
+        'book_id',
+        'due_date',
+        'status',
+        'returned_at',
+    ];
+
     protected $casts = [
         'status' => BorrowStatus::class,
+        'due_date' => 'date',
+        'returned_at' => 'datetime',
     ];
 
     public function user(): BelongsTo
@@ -26,5 +36,11 @@ class Borrow extends Model
     public function fine(): HasOne
     {
         return $this->hasOne(Fine::class);
+    }
+
+    public function isOverdue(): bool
+    {
+        return $this->status === BorrowStatus::ACTIVE
+            && $this->due_date->isPast();
     }
 }

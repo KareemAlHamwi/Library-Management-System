@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Author\AuthorsController;
 use App\Http\Controllers\Book\BooksController;
 use App\Http\Controllers\Book\GoogleBooksController;
+use App\Http\Controllers\Borrow\BorrowController;
 use App\Http\Controllers\Cart\CartController;
 use App\Http\Controllers\Category\CategoryController;
 use App\Http\Controllers\Event\EventController;
@@ -240,5 +241,22 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/events/{event}/submissions', [SubmissionController::class, 'supervisorEventSubmissions']);
         Route::post('/submissions/{submission}/approve', [SubmissionController::class, 'supervisorApprove']);
         Route::post('/submissions/{submission}/reject', [SubmissionController::class, 'supervisorReject']);
+    });
+
+    // Borrows — user
+    Route::post('/books/{book}/borrow', [BorrowController::class, 'store']);
+    Route::get('/my-borrows', [BorrowController::class, 'myBorrows']);
+    Route::get('/my-borrows/{id}', [BorrowController::class, 'show']);
+    Route::get('/my-fines', [BorrowController::class, 'myFines']);
+    Route::post('/fines/{fine}/pay', [BorrowController::class, 'payFine']);
+
+    // Borrows — admin
+    Route::middleware('can:is-admin')->prefix('admin')->group(function () {
+        Route::get('/borrows', [BorrowController::class, 'adminIndex']);
+        Route::get('/borrows/{id}', [BorrowController::class, 'adminShow']);
+        Route::post('/borrows/{borrow}/approve', [BorrowController::class, 'approve']);
+        Route::post('/borrows/{borrow}/reject', [BorrowController::class, 'reject']);
+        Route::post('/borrows/{borrow}/return', [BorrowController::class, 'markReturned']);
+        Route::post('/borrows/{borrow}/overdue', [BorrowController::class, 'markOverdue']);
     });
 });
