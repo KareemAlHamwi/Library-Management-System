@@ -58,6 +58,15 @@ class RewardController extends Controller
                 ], 400);
             }
 
+            if ($this->rewardService->hasPendingRequest($user)) {
+                $pendingRequest = $this->rewardService->getPendingRequest($user);
+                return response()->json([
+                    'message' => 'You currently have a transfer request in progress. Please wait until it is approved or rejected.',
+                    'pending_request' => $pendingRequest,
+                    'status' => 'pending_exists'
+                ], 409); // 409 Conflict
+            }
+
             if ($user->purchase_points < $points) {
                 return response()->json([
                     'message' => 'Insufficient purchase points',
@@ -173,9 +182,16 @@ class RewardController extends Controller
                     'current_status' => $conversionRequest->status
                 ], 400);
             }
-
-            $this->rewardService->approveConversion($conversionRequest);
             $user = $conversionRequest->user;
+            if ($user->purchase_points < $conversionRequest->points_to_convert) {
+                return response()->json([
+                    'message' => 'The purchase points are insufficient. They may have already been used in another order.',
+                    'available_points' => $user->purchase_points,
+                    'required_points' => $conversionRequest->points_to_convert
+                ], 400);
+            }
+            $this->rewardService->approveConversion($conversionRequest);
+
             Notification::send($user, new ConversionApprovedNotification($conversionRequest));
             return response()->json([
                 'message' => 'The transfer request has been successfully approved.',

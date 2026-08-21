@@ -97,7 +97,7 @@ class WalletController extends Controller
             );
 
             return response()->json([
-                'message' => 'تم شحن المحفظة بنجاح',
+                'message' => 'The wallet has been successfully funded.',
                 'amount' => $request->amount,
                 'new_balance' => $wallet->fresh()->balance,
                 'currency' => $wallet->currency,
@@ -124,6 +124,15 @@ class WalletController extends Controller
             $amount = $request->amount;
             $paymentMethod = $request->payment_method ?? 'bank_transfer';
 
+            if ($this->walletService->hasPendingTopUpRequest($user)) {
+                $pendingRequest = $this->walletService->getPendingTopUpRequest($user);
+                return response()->json([
+                    'message' => 'You currently have a top-up request being processed. Please wait until it is approved or rejected.',
+                    'pending_request' => $pendingRequest,
+                    'status' => 'pending_exists'
+                ], 409); // 409 Conflict
+            }
+
             $topUpRequest = $this->walletService->requestTopUp($user, $amount, $paymentMethod);
 
             return response()->json([
@@ -145,7 +154,8 @@ class WalletController extends Controller
         $requests = $this->walletService->getUserTopUpRequests($user);
 
         return response()->json([
-            'requests' => $requests
+            'requests' => $requests,
+            'has_pending' => $this->walletService->hasPendingTopUpRequest($user),
         ]);
     }
 

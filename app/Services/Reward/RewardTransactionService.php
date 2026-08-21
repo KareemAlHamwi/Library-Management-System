@@ -82,6 +82,14 @@ class RewardTransactionService
     public function requestConversion(User $user, int $pointsToConvert): ConversionRequest
     {
 
+
+        $pendingRequest = ConversionRequest::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->first();
+
+        if ($pendingRequest) {
+            throw new \Exception('You currently have a pending CPU transfer request. Please wait for it to be approved or rejected.');
+        }
         if ($user->purchase_points < $pointsToConvert) {
             throw new \Exception(' Insufficient purchase points ');
         }
@@ -155,6 +163,10 @@ class RewardTransactionService
         }
 
         $user = $conversionRequest->user;
+        $pointsToConvert = $conversionRequest->points_to_convert;
+        if ($user->purchase_points < $pointsToConvert) {
+            throw new \Exception('The purchase points are insufficient. They may have already been used in another order.');
+        }
         $pointsToConvert = $conversionRequest->points_to_convert;
 
         DB::transaction(function () use ($user, $pointsToConvert, $conversionRequest) {
@@ -272,5 +284,19 @@ class RewardTransactionService
         return ConversionRequest::with('user')
             ->orderBy('requested_at', 'desc')
             ->get();
+    }
+
+    public function hasPendingRequest(User $user): bool
+    {
+        return ConversionRequest::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->exists();
+    }
+
+    public function getPendingRequest(User $user): ?ConversionRequest
+    {
+        return ConversionRequest::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->first();
     }
 }

@@ -84,6 +84,14 @@ class WalletService
             throw new \Exception('The amount must be greater than zero.');
         }
 
+        $pendingRequest = TopUpRequest::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->first();
+
+        if ($pendingRequest) {
+            throw new \Exception('You currently have a top-up request being processed. Please wait until it is approved or rejected.');
+        }
+
         $request = TopUpRequest::create([
             'user_id' => $user->id,
             'amount' => $amount,
@@ -155,6 +163,20 @@ class WalletService
             ->get();
     }
 
+    public function hasPendingTopUpRequest(User $user): bool
+    {
+        return TopUpRequest::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->exists();
+    }
+
+
+    public function getPendingTopUpRequest(User $user): ?TopUpRequest
+    {
+        return TopUpRequest::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->first();
+    }
 
     public function getBalance(Wallet $wallet): float
     {
