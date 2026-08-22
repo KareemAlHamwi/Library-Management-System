@@ -129,4 +129,59 @@ class UserController extends Controller
             'admin' => Auth::user()->email,
         ]);
     }
+    public function listAll(): JsonResponse
+    {
+
+
+        $users = $this->userService->getAllUsersList();
+
+        return response()->json([
+            'users' => $users->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->first_name . ' ' . $user->last_name,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                    'phone_number' => $user->phone_number,
+                    'created_at' => $user->created_at,
+                ];
+            }),
+            'total' => $users->count()
+        ]);
+    }
+    public function index(Request $request): JsonResponse
+    {
+
+
+        $perPage = $request->input('per_page', 15);
+        $users = $this->userService->getAllUsers($perPage);
+
+        return response()->json([
+            'users' => $users->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'first_name' => $user->first_name,
+                    'last_name' => $user->last_name,
+                    'name' => $user->first_name . ' ' . $user->last_name,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                    'phone_number' => $user->phone_number,
+                    'address' => $user->address,
+                    'birthdate' => $user->birthdate,
+                    'avatar' => $user->avatar_url,
+                    'purchase_points' => $user->purchase_points,
+                    'loyalty_points' => $user->loyalty_points,
+                    'email_verified_at' => $user->email_verified_at,
+                    'created_at' => $user->created_at,
+                    'updated_at' => $user->updated_at,
+                ];
+            }),
+            'pagination' => [
+                'current_page' => $users->currentPage(),
+                'per_page' => $users->perPage(),
+                'total' => $users->total(),
+                'last_page' => $users->lastPage(),
+            ]
+        ]);
+    }
 }

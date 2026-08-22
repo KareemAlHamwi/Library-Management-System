@@ -4,6 +4,7 @@ namespace App\Repositories\Eloquent\User;
 
 use App\Models\User;
 use App\Repositories\Contracts\User\UserRepositoryInterface;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class UserRepository implements UserRepositoryInterface
 {
@@ -40,5 +41,13 @@ class UserRepository implements UserRepositoryInterface
     public function delete(User $user): bool
     {
         return $user->delete();
+    }
+    public function all(): \Illuminate\Database\Eloquent\Collection
+    {
+        return User::all();
+    }
+    public function paginate(int $perPage = 15): LengthAwarePaginator
+    {
+        return User::paginate($perPage);
     }
 }

@@ -13,6 +13,14 @@ class UserService
 {
     public function __construct(private UserRepositoryInterface $userRepository) {}
 
+    public function getAllUsers(int $perPage = 15)
+    {
+        return $this->userRepository->paginate($perPage);
+    }
+    public function getAllUsersList()
+    {
+        return $this->userRepository->all();
+    }
     public function findById(int $id): User
     {
         return $this->userRepository->findById($id);

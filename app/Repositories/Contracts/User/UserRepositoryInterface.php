@@ -3,6 +3,7 @@
 namespace App\Repositories\Contracts\User;
 
 use App\Models\User;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface UserRepositoryInterface
 {
@@ -14,4 +15,6 @@ interface UserRepositoryInterface
 
     public function verifyEmail(User $user, ?string $pendingEmail): void;
     public function delete(User $user): bool;
+    public function all(): \Illuminate\Database\Eloquent\Collection;
+    public function paginate(int $perPage = 15): LengthAwarePaginator;
 }
